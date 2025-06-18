@@ -5,7 +5,7 @@ This is a WordPress plugin that integrates various form builders (starting with 
 ---
 
 ## 🔗 Website
-[EtchMail.com](https://etchmail.com)
+[Etchmail.com](https://etchmail.com)
 
 ---
 
@@ -60,6 +60,6 @@ See the full license in the [`LICENSE`](LICENSE) file.
 
 ## 🤝 Support & Contact
 
-For questions, support, or licensing inquiries, please visit [EtchMail.com](https://etchmail.com/contact) or contact us directly.
+For questions, support, or licensing inquiries, please visit [Etchmail.com](https://etchmail.com/contact) or contact us directly.
 
 ---
