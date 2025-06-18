@@ -51,7 +51,7 @@ This is a WordPress plugin that integrates various form builders (starting with 
 
 ## 📝 License
 
-This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.  
+This project is licensed under the **GNU General Public License v3.0**.  
 While you are free to use and study this plugin, redistribution and modification are **not encouraged** without prior consent.
 
 See the full license in the [`LICENSE`](LICENSE) file.
