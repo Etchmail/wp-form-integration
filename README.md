@@ -5,7 +5,7 @@ This is a WordPress plugin that integrates various form builders (starting with 
 ---
 
 ## 🔗 Website
-##[Etchmail.com](https://etchmail.com)
+[Etchmail.com](https://etchmail.com)
 
 ---
 
