@@ -20,7 +20,7 @@ This is a WordPress plugin that integrates various form builders (starting with 
 ## 📥 Installation
 
 1. **Download the plugin**:
-   - Clone or [download the ZIP from GitHub](https://github.com/your-repo-link)
+   - Clone or [download the ZIP from GitHub](https://github.com/Etchmail/wp-form-integration/)
 2. **Upload to WordPress**:
    - Go to `Plugins` → `Add New` → `Upload Plugin`
    - Upload the ZIP file
