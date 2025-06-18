@@ -1,7 +1,7 @@
 <?php defined('ABSPATH') || exit; // wp-etchmail-forms.php
 /**
  * Plugin Name: Etchmail Contact Form Integration
- * Plugin URI: https://yourwebsite.com
+ * Plugin URI: https://github.com/Etchmail/wp-form-integration
  * Description: Etchmail signup form integrations
  * Version: 1.0.0
  * Author: Tiaan Kellerman

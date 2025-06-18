@@ -4,14 +4,14 @@
 function emfi_api_v2_request($method, $endpoint, $data = array(), $config = null) {
 	if (!$config) {
 		if (!class_exists('EmfiConfig')) {
-			error_log('EtchMail API: EmfiConfig class not found');
+			error_log('Etchmail API: EmfiConfig class not found');
 			return false;
 		}
 		$config = EmfiConfig::all();
 	}
 
 	if (empty($config['api_url']) || empty($config['api_key'])) {
-		error_log('EtchMail API: Config missing or incomplete');
+		error_log('Etchmail API: Config missing or incomplete');
 		return false;
 	}
 
@@ -33,7 +33,7 @@ function emfi_api_v2_request($method, $endpoint, $data = array(), $config = null
 	$response = wp_remote_request($endpoint, $args);
 
 	if (is_wp_error($response)) {
-		error_log('EtchMail API error: ' . $response->get_error_message());
+		error_log('Etchmail API error: ' . $response->get_error_message());
 		return false;
 	}
 

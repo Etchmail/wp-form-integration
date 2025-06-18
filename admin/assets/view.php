@@ -14,7 +14,7 @@
 
 	<div class="card" style="margin-top: 20px;">
 		<h2>Test Connection</h2>
-		<p>Test your EtchMail API connection:</p>
+		<p>Test your Etchmail API connection:</p>
 		<button type="button" id="test-connection" class="button">Test Connection</button>
 		<div id="connection-result" style="margin-top: 10px;"></div>
 	</div>
@@ -24,14 +24,14 @@
 		<ol>
 			<li><strong>Get your API credentials</strong>:
 				<ul>
-					<li>Log into your EtchMail backend</li>
+					<li>Log into your Etchmail backend</li>
 					<li>Go to "Configuration" → "API keys"</li>
 					<li>Copy your Private API Key (API 2.0 only needs the private key)</li>
 				</ul>
 			</li>
 			<li><strong>Configure the plugin</strong>:
 				<ul>
-					<li>Enter your EtchMail API URL (e.g., https://yourdomain.com/api)</li>
+					<li>Enter your Etchmail API URL (e.g., https://yourdomain.com/api)</li>
 					<li>Enter your Private API Key</li>
 					<li>Save the settings</li>
 				</ul>
@@ -39,9 +39,9 @@
 			<li><strong>Configure Contact Form 7</strong>:
 				<ul>
 					<li>Edit any Contact Form 7 form</li>
-					<li>Go to the "EtchMail Integration" tab</li>
+					<li>Go to the "Etchmail Integration" tab</li>
 					<li>Enable integration and select a mailing list</li>
-					<li>Map your form fields to EtchMail subscriber fields</li>
+					<li>Map your form fields to Etchmail subscriber fields</li>
 				</ul>
 			</li>
 		</ol>

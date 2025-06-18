@@ -1,6 +1,6 @@
-# WP Form Integration for EtchMail
+# WP Form Integration for Etchmail
 
-This is a WordPress plugin that integrates various form builders (starting with Contact Form 7) with [EtchMail](https://etchmail.com), allowing you to subscribe users directly from your site forms.
+This is a WordPress plugin that integrates various form builders (starting with Contact Form 7) with [Etchmail](https://etchmail.com), allowing you to subscribe users directly from your site forms.
 
 ---
 
@@ -30,13 +30,13 @@ This is a WordPress plugin that integrates various form builders (starting with 
 
 ## ⚙️ Configuration
 
-1. Navigate to **Settings → EtchMail Integration**
+1. Navigate to **Settings → Etchmail Integration**
 2. Enter your:
-   - **EtchMail API URL** (`provided by support`)
+   - **Etchmail API URL** (`provided by support`)
    - **Private API Key**
 3. Select the form plugin you want to integrate (e.g. Contact Form 7)
 4. Save settings
-5. That’s it! Submissions will be sent to EtchMail when a form is submitted.
+5. That’s it! Submissions will be sent to Etchmail when a form is submitted.
 
 > ℹ️ Make sure the selected form plugin (e.g. Contact Form 7) is installed and active.
 

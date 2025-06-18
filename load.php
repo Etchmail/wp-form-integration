@@ -8,14 +8,14 @@ require_once (EMFI_PLUGIN_DIR . 'admin/settings.php');
 // Run integration only if the selected plugin is enabled and available
 add_action('plugins_loaded', function () {
 	if (!class_exists('EmfiConfig')) {
-		error_log('EtchMail: Emfi_Config not loaded.');
+		error_log('Etchmail: Emfi_Config not loaded.');
 		return;
 	}
 
 	$enabled = EmfiConfig::get('enabled_form');
 
 	if (!$enabled) {
-		error_log('EtchMail: No form integration selected.');
+		error_log('Etchmail: No form integration selected.');
 		return;
 	}
 
@@ -27,7 +27,7 @@ add_action('plugins_loaded', function () {
 	};
 
 	if (!$plugin_ready) {
-		error_log("EtchMail: Selected form plugin [$enabled] not installed or active.");
+		error_log("Etchmail: Selected form plugin [$enabled] not installed or active.");
 		return;
 	}
 
@@ -37,6 +37,6 @@ add_action('plugins_loaded', function () {
 	if (file_exists($integration_file)) {
 		require_once $integration_file;
 	} else {
-		error_log("EtchMail: Integration file for [$enabled] not found.");
+		error_log("Etchmail: Integration file for [$enabled] not found.");
 	}
 });

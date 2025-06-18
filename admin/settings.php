@@ -11,8 +11,8 @@ class Emfi_Admin_Settings {
 
 	public function add_admin_menu() {
 		add_options_page(
-			'EtchMail Form Integration',
-			'EtchMail Integration',
+			'Etchmail Form Integration',
+			'Etchmail Integration',
 			'manage_options',
 			'etchmail-fi',
 			[ $this, 'render_settings_page' ]
@@ -49,7 +49,7 @@ class Emfi_Admin_Settings {
 		$response = emfi_api_v2_request( 'GET', $endpoint, [], $config );
 
 		// Log raw response for debugging
-		error_log('EtchMail Test Connection Response: ' . print_r($response, true));
+		error_log('Etchmail Test Connection Response: ' . print_r($response, true));
 
 		if ( is_wp_error( $response ) ) {
 			wp_send_json_error( 'Request error: ' . $response->get_error_message() );
@@ -60,7 +60,7 @@ class Emfi_Admin_Settings {
 			wp_send_json_success( 'Connection successful!' );
 		} else {
 			// Log full failure response
-			error_log('EtchMail API failed: ' . json_encode($response));
+			error_log('Etchmail API failed: ' . json_encode($response));
 			wp_send_json_error( 'Connection failed. Please check your API settings.' );
 		}
 	}

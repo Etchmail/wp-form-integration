@@ -57,7 +57,7 @@ class EmfiConfig {
 
 		add_settings_section(
 			'emfi_config_section',
-			'EtchMail Settings',
+			'Etchmail Settings',
 			null,
 			self::OPTION_PAGE
 		);
@@ -76,5 +76,24 @@ class EmfiConfig {
 			$out[$key] = self::get($key);
 		}
 		return $out;
+	}
+
+	public static function getLists() {
+
+			$endpoint = self::get('api_url') . '/lists';
+
+			$response = emfi_api_v2_request('GET', $endpoint);
+
+			if (!$response || !isset($response['data']['records'])) {
+				return false;
+			}
+
+			$lists = array();
+			foreach ($response['data']['records'] as $list) {
+				$lists[$list['general']['list_uid']] = $list['general']['name'];
+			}
+
+			return $lists;
+
 	}
 }
