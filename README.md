@@ -32,7 +32,7 @@ This is a WordPress plugin that integrates various form builders (starting with 
 
 1. Navigate to **Settings → EtchMail Integration**
 2. Enter your:
-   - **EtchMail API URL** (e.g. `provided by support`)
+   - **EtchMail API URL** (`provided by support`)
    - **Private API Key**
 3. Select the form plugin you want to integrate (e.g. Contact Form 7)
 4. Save settings
