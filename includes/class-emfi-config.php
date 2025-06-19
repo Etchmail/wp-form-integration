@@ -85,7 +85,7 @@ class EmfiConfig {
 			$response = emfi_api_v2_request('GET', $endpoint);
 
 			if (!$response || !isset($response['data']['records'])) {
-				return false;
+				return null;
 			}
 
 			$lists = array();
@@ -94,6 +94,38 @@ class EmfiConfig {
 			}
 
 			return $lists;
+
+	}
+
+	public static function getFields($list_uid = null) {
+
+		if ($list_uid == null){
+			return null;
+		}
+
+		$endpoint = self::get('api_url') . "/lists/{$list_uid}/fields";
+
+		$response = emfi_api_v2_request('GET', $endpoint);
+
+		if (!$response || !isset($response['data']['records'])) {
+			return null;
+		}
+
+		$fields = array();
+
+		foreach ($response['data']['records'] as $field) {
+			if ($field['visibility'] == "visible"){
+				$fields[] = [
+					'label' => $field['label'],
+					'tag' => $field['tag'],
+					'default_value' => $field['default_value'],
+					'required' => $field['required'],
+					'type' => $field['type']['identifier'],
+				];
+			}
+		}
+
+		return $fields;
 
 	}
 }
