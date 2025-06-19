@@ -27,7 +27,6 @@ add_action('plugins_loaded', function () {
 	};
 
 	if (!$plugin_ready) {
-		error_log("Etchmail: Selected form plugin [$enabled] not installed or active.");
 		return;
 	}
 

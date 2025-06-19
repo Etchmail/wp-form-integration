@@ -128,4 +128,62 @@ class EmfiConfig {
 		return $fields;
 
 	}
+
+	public static function submitToList( string $list_uid, array $data ) : void {
+
+		/* 1. Gather the mapped fields ------------------------------------ */
+		$body   = [];     // final multipart payload
+		$email  = '';     // promoted address (first email field wins)
+
+		$type2filter = [
+			'text'     => 'text',
+			'email'    => 'email',
+			'url'      => 'url',
+			'checkbox' => 'bool',
+		];
+
+		foreach ( $data as $field ) {
+
+			$type = $field['type'] ?? 'text';
+			if ( ! isset( $type2filter[ $type ] ) ) {
+				continue;
+			}
+
+			$tag   = self::user_input( (string) $field['tag'] );
+			$value = self::user_input( (string) $field['value'], $type2filter[ $type ] );
+
+			if ( $type === 'email' && $email === '' ) {
+				$email = $value;          // only first email field
+			}
+
+			$body[ $tag ] = $value;       // FNAME, LNAME, custom tags …
+		}
+
+		if ( $email === '' ) {
+			error_log( '[Etchmail] skipped – no email address found.' );
+			return;
+		}
+
+		$body['EMAIL']               = $email;          // Etchmail’s required field
+		$body['details[source]']     = 'web';     // flat “details[…]” key
+		$body['details[ip_address]'] = $_SERVER['REMOTE_ADDR'] ?? '';
+
+		/* 2. Hit the endpoint ------------------------------------------- */
+		$endpoint = self::get( 'api_url' ) . "/lists/{$list_uid}/subscribers";
+		$resp     = emfi_api_v2_request( 'POST', $endpoint, $body );
+
+		if ( ! is_array( $resp ) || ( $resp['status'] ?? '' ) !== 'success' ) {
+			error_log( '[Etchmail] API error: ' . wp_json_encode( $resp ) );
+		}
+	}
+
+	/* ---------- Simple sanitiser ---------- */
+	public static function user_input( string $str, ?string $type = 'text' ) : string {
+		switch ( $type ) {
+			case 'email': return sanitize_email( $str );
+			case 'url':   return esc_url_raw( $str );
+			case 'bool':  return $str === 'on' || $str === '1' ? '1' : '0';
+			default:      return sanitize_text_field( $str );
+		}
+	}
 }

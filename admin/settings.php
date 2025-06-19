@@ -48,9 +48,6 @@ class Emfi_Admin_Settings {
 
 		$response = emfi_api_v2_request( 'GET', $endpoint, [], $config );
 
-		// Log raw response for debugging
-		error_log('Etchmail Test Connection Response: ' . print_r($response, true));
-
 		if ( is_wp_error( $response ) ) {
 			wp_send_json_error( 'Request error: ' . $response->get_error_message() );
 			return;

@@ -224,27 +224,41 @@ class EMFI_CF7 {
 
 	public function handle_form_submission( $contact_form ) {
 
-		$form_id = $contact_form->id();
-
-		$plugin_enabled = get_option("emfi_cf7_{$form_id}_enabled") ?? false;
-		if (!$plugin_enabled) {
-			return;
+		$form_id = (int) $contact_form->id();
+		if ( ! get_option( "emfi_cf7_{$form_id}_enabled", false ) ) {
+			return;                       // integration off
 		}
 
-		$form_fields = $contact_form->scan_form_tags();
-		$list_uid = get_option("emfi_cf7_{$form_id}_list_uid");
-		$mapped_fields = get_option("emfi_cf7_{$form_id}_mapped_fields");
+		$list_uid      = get_option( "emfi_cf7_{$form_id}_list_uid", '' );
+		$mapped_fields = get_option( "emfi_cf7_{$form_id}_mapped_fields", [] );
+		if ( empty( $list_uid ) || empty( $mapped_fields ) ) {
+			return;                       // mis-configured
+		}
 
 		$submission = WPCF7_Submission::get_instance();
-
-		if (!$submission) {
-			return;
+		if ( ! $submission ) {
+			return;                       // should never happen
 		}
 
-		$submitted_data = $submission->get_posted_data();
-//		error_log(print_r($submitted_data,true));
+		/* -------- Build lookup: cf7Name -> baseType (e.g. "email") -------- */
+		$cf7_types = [];
+		foreach ( $contact_form->scan_form_tags() as $tag ) {
+			$cf7_types[ $tag->name ] = strtolower( rtrim( $tag->type, '*' ) );
+		}
 
-		// Implement your “subscribe this contact to Etchmail” logic here …
+		/* -------- Assemble the payload for submitToList() -------- */
+		$payload = [];
+		foreach ( $mapped_fields as $cf7_name => $etch_tag ) {
+
+			$payload[] = [
+				'tag'   => $etch_tag,
+				'type'  => rtrim(strtolower($cf7_types[ $cf7_name ]) ?? 'text', '*'),   // default to text
+				'value' => $submission->get_posted_data( $cf7_name ) ?? '',
+			];
+		}
+
+		/* -------- Call the helper -------- */
+		EmfiConfig::submitToList( $list_uid, $payload );
 	}
 }
 
