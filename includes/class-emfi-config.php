@@ -136,10 +136,25 @@ class EmfiConfig {
 		$email  = '';     // promoted address (first email field wins)
 
 		$type2filter = [
+			// Basic text-based input
 			'text'     => 'text',
+			'textarea' => 'textarea',
+
+			// Contact & personal info
 			'email'    => 'email',
+			'tel'      => 'tel',
 			'url'      => 'url',
-			'checkbox' => 'bool',
+
+			// Structured data
+			'number'   => 'number',
+			'date'     => 'date',
+
+			// Selection inputs
+			'radio'    => 'radio',
+			'checkbox' => 'checkbox',
+
+			// Misc
+			'bool'     => 'bool',
 		];
 
 		foreach ( $data as $field ) {
@@ -149,8 +164,8 @@ class EmfiConfig {
 				continue;
 			}
 
-			$tag   = self::user_input( (string) $field['tag'] );
-			$value = self::user_input( (string) $field['value'], $type2filter[ $type ] );
+			$tag   = self::user_input($field['tag'] );
+			$value = self::user_input($field['value'], $type2filter[ $type ] );
 
 			if ( $type === 'email' && $email === '' ) {
 				$email = $value;          // only first email field
@@ -169,21 +184,69 @@ class EmfiConfig {
 		$body['details[ip_address]'] = $_SERVER['REMOTE_ADDR'] ?? '';
 
 		/* 2. Hit the endpoint ------------------------------------------- */
+
+		error_log('[Etchmail] Mapped Data: ' . print_r($data, true));
+		error_log('[Etchmail] Request Body: ' . print_r($body, true));
+
 		$endpoint = self::get( 'api_url' ) . "/lists/{$list_uid}/subscribers";
 		$resp     = emfi_api_v2_request( 'POST', $endpoint, $body );
 
 		if ( ! is_array( $resp ) || ( $resp['status'] ?? '' ) !== 'success' ) {
+			// Suppress logging if it's the known duplicate subscriber warning
+			if ( isset( $resp['error'] ) && $resp['error'] === 'The subscriber already exists in this list.' ) {
+				return;
+			}
+
 			error_log( '[Etchmail] API error: ' . wp_json_encode( $resp ) );
 		}
 	}
 
-	/* ---------- Simple sanitiser ---------- */
-	public static function user_input( string $str, ?string $type = 'text' ) : string {
-		switch ( $type ) {
-			case 'email': return sanitize_email( $str );
-			case 'url':   return esc_url_raw( $str );
-			case 'bool':  return $str === 'on' || $str === '1' ? '1' : '0';
-			default:      return sanitize_text_field( $str );
+
+	public static function user_input($str, ?string $type = 'text') : string {
+		switch ($type) {
+			case 'email':
+				return sanitize_email((string) $str);
+
+			case 'url':
+				return esc_url_raw((string) $str);
+
+			case 'tel':
+				// Strip non-numeric, allow leading +
+				return preg_replace('/[^\d\+]/', '', (string) $str);
+
+			case 'number':
+				return is_numeric($str) ? (string) $str : '';
+
+			case 'date':
+				// Match YYYY-MM-DD format only
+				return preg_match('/^\d{4}-\d{2}-\d{2}$/', $str) ? $str : '';
+
+			case 'checkbox':
+				// If it's an array (e.g. from checkboxes), implode values with comma
+				if (is_array($str)) {
+					// Ensure each value is a string and safe
+					$str = array_map('sanitize_text_field', $str);
+					return (string)implode(',', $str);
+				}
+				// For a single value checkbox
+				return $str;
+			case 'radio':
+				// Convert array of options into a comma-separated string
+				if (is_array($str)) {
+					$str = array_map('sanitize_text_field', $str);
+					return implode(',', $str);
+				}
+				return sanitize_text_field((string) $str);
+
+			case 'textarea':
+				return sanitize_textarea_field((string) $str);
+
+			case 'bool':
+				return ($str === 'on' || $str === '1' || $str === true) ? '1' : '0';
+
+			case 'text':
+			default:
+				return sanitize_text_field((string) $str);
 		}
 	}
 }

@@ -58,7 +58,12 @@ class EMFI_CF7 {
 			$this->form_fields = $this->form->scan_form_tags();
 			$this->list_fields = $this->list_uid ? EmfiConfig::getFields( $this->list_uid ) : [];
 
-			include EMFI_PLUGIN_DIR . 'integrations/cf7/assets/view.php';
+			if ($this->form->id == 0){
+				echo 'Please save the form, for the integration to enable.';
+			} else {
+				include EMFI_PLUGIN_DIR . 'integrations/cf7/assets/view.php';
+			}
+
 		}
 	}
 
@@ -198,7 +203,7 @@ class EMFI_CF7 {
 		$list_uid = sanitize_text_field( $_POST['list_uid'] ?? '' );
 
 		if ( ! $form_id || ! $list_uid ) {
-			wp_send_json_error( 'Missing parameters' );
+			wp_send_json_error( 'Missing parameters - ' . 'list_uid: ' .  $list_uid . ' | ' . 'form_id: ' .  $form_id );
 		}
 
 		$cf = wpcf7_contact_form( $form_id );
