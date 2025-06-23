@@ -21,12 +21,13 @@ add_action('plugins_loaded', function () {
 
 	$plugin_ready = match ($enabled) {
 		'cf7'     => defined('WPCF7_VERSION'),
-		// 'gravity' => class_exists('GFForms'),
+		'formidable' => class_exists( 'FrmAppHelper' ),
 		// 'ninja'   => class_exists('Ninja_Forms'),
 		default   => false,
 	};
 
 	if (!$plugin_ready) {
+		error_log("Etchmail: {$enabled} Integration could not be loaded.");
 		return;
 	}
 

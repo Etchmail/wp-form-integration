@@ -20,8 +20,7 @@ class EmfiConfig {
 			'options' => [
 				'none'     => 'Disabled',
 				'cf7'     => 'Contact Form 7',
-//				'gravity' => 'Gravity Forms',
-//				'ninja'   => 'Ninja Forms',
+				'formidable' => 'Formidable Forms',
 			],
 			'default' => 'none',
 		],
@@ -129,7 +128,7 @@ class EmfiConfig {
 
 	}
 
-	public static function submitToList( string $list_uid, array $data ) : void {
+	public static function submitToList( string $list_uid, array $data , $ip_address) : void {
 
 		/* 1. Gather the mapped fields ------------------------------------ */
 		$body   = [];     // final multipart payload
@@ -152,6 +151,7 @@ class EmfiConfig {
 			// Selection inputs
 			'radio'    => 'radio',
 			'checkbox' => 'checkbox',
+			'select' => 'checkbox',
 
 			// Misc
 			'bool'     => 'bool',
@@ -181,12 +181,12 @@ class EmfiConfig {
 
 		$body['EMAIL']               = $email;          // Etchmail’s required field
 		$body['details[source]']     = 'web';     // flat “details[…]” key
-		$body['details[ip_address]'] = $_SERVER['REMOTE_ADDR'] ?? '';
+		$body['details[ip_address]'] = $ip_address ?? $_SERVER['REMOTE_ADDR'];
 
 		/* 2. Hit the endpoint ------------------------------------------- */
 
-		error_log('[Etchmail] Mapped Data: ' . print_r($data, true));
-		error_log('[Etchmail] Request Body: ' . print_r($body, true));
+//		error_log('[Etchmail] Mapped Data: ' . print_r($data, true));
+//		error_log('[Etchmail] Request Body: ' . print_r($body, true));
 
 		$endpoint = self::get( 'api_url' ) . "/lists/{$list_uid}/subscribers";
 		$resp     = emfi_api_v2_request( 'POST', $endpoint, $body );
