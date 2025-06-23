@@ -1,4 +1,4 @@
-<?php defined('ABSPATH') || exit; // include/function.php
+<?php defined('ABSPATH') || exit; // includes/function.php
 
 
 function emfi_api_v2_request( string $method, string $endpoint, array $body = [], ?array $config = null ) {

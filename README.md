@@ -11,9 +11,8 @@ This is a WordPress plugin that integrates various form builders (starting with 
 
 ## 📦 Features
 
-- Contact Form 7 integration (more coming soon)
-- API key configuration in the WordPress admin
-- Modular architecture for easy extension
+- Contact Form 7 integration
+- Formidable Forms integration
 
 ---
 

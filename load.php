@@ -19,17 +19,24 @@ add_action('plugins_loaded', function () {
 		return;
 	}
 
+	// check if the dependency is enabled.
 	$plugin_ready = match ($enabled) {
 		'cf7'     => defined('WPCF7_VERSION'),
 		'formidable' => class_exists( 'FrmAppHelper' ),
+		'fluent' => defined( 'FLUENTFORM' ),
 		// 'ninja'   => class_exists('Ninja_Forms'),
 		default   => false,
 	};
+
+	if ($enabled == 'none'){
+		return; // disables the loading
+	}
 
 	if (!$plugin_ready) {
 		error_log("Etchmail: {$enabled} Integration could not be loaded.");
 		return;
 	}
+
 
 	// Load the correct integration file
 	$integration_file = plugin_dir_path(__FILE__) . "integrations/{$enabled}/main.php";

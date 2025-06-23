@@ -21,6 +21,7 @@ class EmfiConfig {
 				'none'     => 'Disabled',
 				'cf7'     => 'Contact Form 7',
 				'formidable' => 'Formidable Forms',
+//				'fluent' => 'Fluent Forms',
 			],
 			'default' => 'none',
 		],
