@@ -262,8 +262,8 @@ class EMFI_CF7 {
 			];
 		}
 
-		/* -------- Call the helper -------- */
-		EmfiConfig::submitToList( $list_uid, $payload );
+               /* -------- Call the helper -------- */
+               EmfiConfig::submitToList( $list_uid, $payload, $_SERVER['REMOTE_ADDR'] ?? null );
 	}
 }
 

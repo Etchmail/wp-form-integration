@@ -128,7 +128,14 @@ class EmfiConfig {
 
 	}
 
-	public static function submitToList( string $list_uid, array $data , $ip_address) : void {
+       /**
+        * Submit mapped form data to a specific Etchmail list.
+        *
+        * @param string      $list_uid    Target list UID.
+        * @param array       $data        Array of mapped fields.
+        * @param string|null $ip_address  Optional originating IP address.
+        */
+       public static function submitToList( string $list_uid, array $data, ?string $ip_address = null ) : void {
 
 		/* 1. Gather the mapped fields ------------------------------------ */
 		$body   = [];     // final multipart payload
