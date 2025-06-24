@@ -206,14 +206,17 @@ class EmfiConfig {
 			$body[ $tag ] = $value;       // FNAME, LNAME, custom tags …
 		}
 
-		if ( $email === '' ) {
-			error_log( '[Etchmail] skipped – no email address found.' );
-			return;
-		}
+                if ( $email === '' ) {
+                        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                                error_log( '[Etchmail] skipped – no email address found.' );
+                        }
+                        return;
+                }
 
 		$body['EMAIL']               = $email;          // Etchmail’s required field
 		$body['details[source]']     = 'web';     // flat “details[…]” key
-		$body['details[ip_address]'] = $ip_address ?? $_SERVER['REMOTE_ADDR'];
+                $server_ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+                $body['details[ip_address]'] = $ip_address ?: $server_ip;
 
 		/* 2. Hit the endpoint ------------------------------------------- */
 
@@ -230,8 +233,10 @@ class EmfiConfig {
 				return;
 			}
 
-			error_log( '[Etchmail] API error: ' . wp_json_encode( $resp ) );
-		}
+                        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                                error_log( '[Etchmail] API error: ' . wp_json_encode( $resp ) );
+                        }
+                }
 	}
 
 

@@ -54,13 +54,15 @@ class Emfi_Admin_Settings {
 			return;
 		}
 
-		if ( $response && isset( $response['status'] ) && $response['status'] === 'success' ) {
-			wp_send_json_success( 'Connection successful!' );
-		} else {
-			// Log full failure response
-			error_log('Etchmail API failed: ' . json_encode($response));
-			wp_send_json_error( 'Connection failed. Please check your API settings.' );
-		}
+                if ( $response && isset( $response['status'] ) && $response['status'] === 'success' ) {
+                        wp_send_json_success( 'Connection successful!' );
+                } else {
+                        // Log full failure response when debugging
+                        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                                error_log( 'Etchmail API failed: ' . json_encode( $response ) );
+                        }
+                        wp_send_json_error( 'Connection failed. Please check your API settings.' );
+                }
 	}
 }
 
