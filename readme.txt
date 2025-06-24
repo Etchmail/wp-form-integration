@@ -1,11 +1,11 @@
 === Etchmail Form Integration ===
 Contributors: thewickettk
 Donate link: https://etchmail.com/contact
-Tags: etchmail, forms, integration, email-marketing, contact form 7, formidable forms, fluent forms
+Tags: etchmail, forms, integration, email-marketing
 Requires at least: 5.2
 Tested up to: 6.8
 Requires PHP: 8.2
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPL-3.0
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 

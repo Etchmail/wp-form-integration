@@ -18,36 +18,7 @@
 		<button type="button" id="test-connection" class="button">Test Connection</button>
 		<div id="connection-result" style="margin-top: 10px;"></div>
 	</div>
-
-	<div class="card" style="margin-top: 20px;">
-		<h2>Setup Instructions</h2>
-		<ol>
-			<li><strong>Get your API credentials</strong>:
-				<ul>
-					<li>Log into your Etchmail backend</li>
-					<li>Go to "Configuration" → "API keys"</li>
-					<li>Copy your Private API Key (API 2.0 only needs the private key)</li>
-				</ul>
-			</li>
-			<li><strong>Configure the plugin</strong>:
-				<ul>
-					<li>Enter your Etchmail API URL (e.g., https://yourdomain.com/api)</li>
-					<li>Enter your Private API Key</li>
-					<li>Save the settings</li>
-				</ul>
-			</li>
-			<li><strong>Configure Contact Form 7</strong>:
-				<ul>
-					<li>Edit any Contact Form 7 form</li>
-					<li>Go to the "Etchmail Integration" tab</li>
-					<li>Enable integration and select a mailing list</li>
-					<li>Map your form fields to Etchmail subscriber fields</li>
-				</ul>
-			</li>
-		</ol>
-	</div>
 </div>
-<?php $nonce = wp_create_nonce('etchmail_nonce'); ?>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const button = document.getElementById("test-connection");
@@ -67,7 +38,7 @@
                 },
                 body: new URLSearchParams({
                     action: "test_etchmail_connection",
-                    nonce: "<?php echo esc_js($nonce); ?>"
+                    nonce: "<?php echo esc_js(wp_create_nonce('etchmail_nonce')); ?>"
                 })
             })
                 .then(res => res.json())

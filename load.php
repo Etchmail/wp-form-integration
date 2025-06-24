@@ -9,7 +9,7 @@ require_once (EMFI_PLUGIN_DIR . 'admin/settings.php');
 add_action('plugins_loaded', function () {
         if ( ! class_exists( 'EmfiConfig' ) ) {
                 if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                        error_log( 'Etchmail: Emfi_Config not loaded.' );
+	                log_emfi( 'Etchmail: Emfi_Config not loaded.' , 'error');
                 }
                 return;
         }
@@ -18,7 +18,7 @@ add_action('plugins_loaded', function () {
 
         if ( ! $enabled ) {
                 if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                        error_log( 'Etchmail: No form integration selected.' );
+	                log_emfi( 'Etchmail: No form integration selected.' ,'error');
                 }
                 return;
         }
@@ -38,7 +38,7 @@ add_action('plugins_loaded', function () {
 
         if ( ! $plugin_ready ) {
                 if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                        error_log( "Etchmail: {$enabled} Integration could not be loaded." );
+                        log_emfi( "Etchmail: {$enabled} Integration could not be loaded." ,'error');
                 }
                 return;
         }
@@ -51,7 +51,7 @@ add_action('plugins_loaded', function () {
                 require_once $integration_file;
         } else {
                 if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                        error_log( "Etchmail: Integration file for [$enabled] not found." );
+	                log_emfi( "Etchmail: Integration file for [$enabled] not found." ,'error');
                 }
         }
 });

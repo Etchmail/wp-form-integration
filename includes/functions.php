@@ -1,36 +1,46 @@
-<?php defined('ABSPATH') || exit; // includes/function.php
+<?php defined( 'ABSPATH' ) || exit; // includes/function.php
 
 
 function emfi_api_v2_request( string $method, string $endpoint, array $body = [], ?array $config = null ) {
 
 	$config = $config ?: EmfiConfig::all();
 
-        if ( empty( $config['api_url'] ) || empty( $config['api_key'] ) ) {
-                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                        error_log( 'Etchmail API: Config missing or incomplete' );
-                }
-                return false;
-        }
+	if ( empty( $config['api_url'] ) || empty( $config['api_key'] ) ) {
+		log_emfi( 'Etchmail API: Config missing or incomplete', 'error' );
+		return false;
+	}
 
-        /* NOTE: no Content-Type header – WP will add the multipart boundary */
-        $args = [
-                'method'  => $method,
-                'headers' => [ 'X-API-KEY' => sanitize_text_field( $config['api_key'] ) ],
-                'timeout' => 30,
-        ];
+	/* NOTE: no Content-Type header – WP will add the multipart boundary */
+	$args = [
+		'method'  => $method,
+		'headers' => [ 'X-API-KEY' => sanitize_text_field( $config['api_key'] ) ],
+		'timeout' => 30,
+	];
 
 	if ( $method === 'POST' && ! empty( $body ) ) {
 		$args['body'] = $body;                 // array ⇒ multipart/form-data
 	}
 
-        $endpoint = esc_url_raw( $endpoint );
-        $resp = wp_remote_request( $endpoint, $args );
+	$endpoint = esc_url_raw( $endpoint );
+	$resp     = wp_remote_request( $endpoint, $args );
 
-        if ( is_wp_error( $resp ) ) {
-                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                        error_log( 'Etchmail API error: ' . $resp->get_error_message() );
-                }
-                return false;
-        }
+	if ( is_wp_error( $resp ) ) {
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			log_emfi( 'Etchmail API error: ' . $resp->get_error_message(), 'error' );
+		}
+
+		return false;
+	}
+
 	return json_decode( wp_remote_retrieve_body( $resp ), true );
+}
+
+
+function log_emfi( $message, $type = 'info' ): void {
+	$log_file = trailingslashit( EMFI_PLUGIN_DIR ) . 'log.txt';
+
+	// Format the log message with a timestamp
+
+	// Write the log message to the file (append mode)
+	file_put_contents( $log_file, sprintf( "[%s] %s\n", gmdate( 'Y-m-d H:i:s' ), "[ " . esc_html( $type ) . " ] - " . esc_html( $message ) ), FILE_APPEND | LOCK_EX );
 }

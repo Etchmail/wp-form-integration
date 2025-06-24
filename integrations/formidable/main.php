@@ -12,7 +12,6 @@ class EMFI_Formidable {
 	public $mapped_fields = [];
 
 	public $list_fields = [];
-	public $debug = false;   // set true to dump vars in admin panel
 	/* -------------------------------------------------------------------- */
 
 	private static $fields = [
@@ -93,27 +92,15 @@ class EMFI_Formidable {
 		if ( ! is_array( $this->mapped_fields ) ) {
 			$this->mapped_fields = [];
 		}
-
-                if ( $this->debug && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                        error_log( print_r( [
-                                'enabled'       => $this->enabled,
-                                'list_uid'      => $this->list_uid,
-                                'mapped_fields' => $this->mapped_fields,
-                        ], true ) );
-                }
 	}
 
 
-	/** Small wrapper: nonce + capability */
-	private function check_admin_ajax() {
+
+	public function ajax_get_lists() {
 		check_ajax_referer( 'etchmail_nonce', 'nonce' );
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( 'Unauthorized' );
 		}
-	}
-
-	public function ajax_get_lists() {
-		$this->check_admin_ajax();
 
 		if ( ! method_exists( 'EmfiConfig', 'getLists' ) ) {
 			wp_send_json_error( 'Etchmail config not available.' );
@@ -131,37 +118,48 @@ class EMFI_Formidable {
 	}
 
 	public function ajax_save_enabled() {
-		$this->check_admin_ajax();
+		check_ajax_referer( 'etchmail_nonce', 'nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( 'Unauthorized' );
+		}
 
-		$form_id = intval( $_POST['form_id'] ?? 0 );
-		$enabled = sanitize_text_field( $_POST['enabled'] ?? '0' );
+		$post     = $_POST;
+		$form_id  = isset( $post['form_id'] ) ? intval( $post['form_id'] ) : 0;
+		$enabled  = isset( $post['enabled'] ) ? sanitize_text_field( wp_unslash( $post['enabled'] ) ) : '0';
 
 		if ( ! $form_id ) {
 			wp_send_json_error( 'Missing form ID' );
 		}
+
 		update_option( "emfi_frm_{$form_id}_enabled", $enabled );
 		wp_send_json_success();
 	}
 
 	public function ajax_get_list_fields() {
-		$this->check_admin_ajax();
+		check_ajax_referer( 'etchmail_nonce', 'nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( 'Unauthorized' );
+		}
 
-		$form_id  = intval( $_POST['form_id'] ?? 0 );
-		$list_uid = sanitize_text_field( $_POST['list_uid'] ?? '' );
+		$post     = $_POST;
+		$form_id  = isset( $post['form_id'] ) ? intval( $post['form_id'] ) : 0;
+		$list_uid = isset( $post['list_uid'] ) ? sanitize_text_field( wp_unslash( $post['list_uid'] ) ) : '';
 
-		if ( ! $form_id || ! $list_uid ) {
-			wp_send_json_error( 'Missing parameters - ' . 'list_uid: ' . $list_uid . ' | ' . 'form_id: ' . $form_id );
+		if ( ! $form_id || empty( $list_uid ) ) {
+			wp_send_json_error( 'Missing parameters - list_uid: ' . esc_html( $list_uid ) . ' | form_id: ' . esc_html( $form_id ) );
 		}
 
 		$form = FrmForm::getOne( $form_id );
 		if ( ! $form ) {
 			wp_send_json_error( 'Invalid form ID' );
 		}
+
 		$form_fields = $this->scan_for_tags( $form_id );
 
 		if ( ! method_exists( 'EmfiConfig', 'getFields' ) ) {
 			wp_send_json_error( 'Etchmail config not available.' );
 		}
+
 		$list_fields = EmfiConfig::getFields( $list_uid );
 		$saved_map   = get_option( "emfi_frm_{$form_id}_mapped_fields", [] );
 
@@ -173,15 +171,20 @@ class EMFI_Formidable {
 	}
 
 	public function ajax_save_list() {
-		$this->check_admin_ajax();
+		check_ajax_referer( 'etchmail_nonce', 'nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( 'Unauthorized' );
+		}
 
-		$form_id  = intval( $_POST['form_id'] ?? 0 );
-		$enabled  = sanitize_text_field( $_POST['enabled'] ?? '0' );
-		$list_uid = sanitize_text_field( $_POST['list_uid'] ?? '' );
+		$post     = $_POST;
+		$form_id  = isset( $post['form_id'] ) ? intval( $post['form_id'] ) : 0;
+		$enabled  = isset( $post['enabled'] ) ? sanitize_text_field( wp_unslash( $post['enabled'] ) ) : '0';
+		$list_uid = isset( $post['list_uid'] ) ? sanitize_text_field( wp_unslash( $post['list_uid'] ) ) : '';
 
 		if ( ! $form_id ) {
 			wp_send_json_error( 'Missing form ID' );
 		}
+
 		update_option( "emfi_frm_{$form_id}_enabled", $enabled );
 		update_option( "emfi_frm_{$form_id}_list_uid", $list_uid );
 		wp_send_json_success();
@@ -189,32 +192,31 @@ class EMFI_Formidable {
 
 	/* ---------- Full save (enable, list + mappings) ---------- */
 	public function ajax_save_settings() {
-		$this->check_admin_ajax();
+		check_ajax_referer( 'etchmail_nonce', 'nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( 'Unauthorized' );
+		}
 
-		$form_id  = intval( $_POST['form_id'] ?? 0 );
-		$enabled  = sanitize_text_field( $_POST['enabled'] ?? '0' );
-		$list_uid = sanitize_text_field( $_POST['list_uid'] ?? '' );
+		$post     = $_POST;
+		$form_id  = isset( $post['form_id'] ) ? intval( $post['form_id'] ) : 0;
+		$enabled  = isset( $post['enabled'] ) ? sanitize_text_field( wp_unslash( $post['enabled'] ) ) : '0';
+		$list_uid = isset( $post['list_uid'] ) ? sanitize_text_field( wp_unslash( $post['list_uid'] ) ) : '';
 
-		/** ── NEW: guarantee we always get an array ───────────────────────── */
-		$mapped_raw = isset( $_POST['mapped_fields'] ) && is_array( $_POST['mapped_fields'] )
-			? $_POST['mapped_fields']
-			: [];
-
-		$mapped = array_map( 'sanitize_text_field', $mapped_raw );
-		/* ------------------------------------------------------------------ */
+		$raw_input   = array_key_exists( 'mapped_fields', $post ) ? wp_unslash( $post['mapped_fields'] ) : [];
+		$mapped_raw  = is_array( $raw_input ) ? $raw_input : [];
+		$mapped      = array_map( 'sanitize_text_field', $mapped_raw );
 
 		if ( ! $form_id ) {
 			wp_send_json_error( 'Missing form ID' );
 		}
 
-		/* --- Validate required list fields are mapped --------------------- */
 		$required = array_filter(
 			EmfiConfig::getFields( $list_uid ),
 			fn( $f ) => ( $f['required'] ?? '' ) === 'yes'
 		);
 		foreach ( $required as $field ) {
 			if ( ! in_array( $field['tag'], $mapped, true ) ) {
-				wp_send_json_error( 'Missing mapping for required field: ' . $field['label'] );
+				wp_send_json_error( 'Missing mapping for required field: ' . esc_html( $field['label'] ) );
 			}
 		}
 
