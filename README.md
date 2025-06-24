@@ -1,6 +1,6 @@
 # WP Form Integration for Etchmail
 
-This is a WordPress plugin that integrates various form builders (starting with Contact Form 7) with [Etchmail](https://etchmail.com), allowing you to subscribe users directly from your site forms.
+This is a WordPress plugin that integrates various form builders with [Etchmail](https://etchmail.com), allowing you to subscribe users directly from your site forms.
 
 ---
 
