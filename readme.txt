@@ -3,7 +3,7 @@ Contributors: thewickettk
 Donate link: https://etchmail.com/contact
 Tags: etchmail, forms, integration, email-marketing, contact form 7, formidable forms, fluent forms
 Requires at least: 5.2
-Tested up to: 6.5.3
+Tested up to: 6.8
 Requires PHP: 8.2
 Stable tag: 1.0.0
 License: GPL-3.0

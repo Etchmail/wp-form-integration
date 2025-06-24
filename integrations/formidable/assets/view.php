@@ -80,11 +80,11 @@ echo '<script>window.emfiCompat = ' .
 						}
 					}
 
-					if ( empty( $required_fields ) ) {
-						echo 'None';
-					} else {
-						echo implode( ', ', $required_fields );
-					}
+                                        if ( empty( $required_fields ) ) {
+                                                echo 'None';
+                                        } else {
+                                                echo esc_html( implode( ', ', $required_fields ) );
+                                        }
 					?>
 				</p>
 
@@ -172,7 +172,7 @@ echo '<script>window.emfiCompat = ' .
         const $loadLists = $('#load-etchmail-lists');
         const $saveBtn = $('#save-emfi-settings');
         const formId = <?php echo (int) $formid; ?>;
-        const nonce = '<?php echo wp_create_nonce( 'etchmail_nonce' ); ?>';
+        const nonce = '<?php echo esc_js( wp_create_nonce( 'etchmail_nonce' ) ); ?>';
 
         /* PHP → JS data blobs */
         let list_fields = <?php echo wp_json_encode( $this->list_fields ); ?>;

@@ -79,9 +79,13 @@ class EMFI_Formidable {
 			return;
 		}
 
-		foreach ( self::$fields as $key => $field ) {
-			register_setting( 'EMFI_FRM', "emfi_frm_{$this->form['id']}_{$key}" );
-		}
+                foreach ( self::$fields as $key => $field ) {
+                        register_setting(
+                                'EMFI_FRM',
+                                "emfi_frm_{$this->form['id']}_{$key}",
+                                [ 'sanitize_callback' => 'sanitize_text_field' ]
+                        );
+                }
 
 		$this->enabled       = get_option( "emfi_frm_{$this->form['id']}_enabled", '0' );
 		$this->list_uid      = get_option( "emfi_frm_{$this->form['id']}_list_uid", '' );
@@ -90,15 +94,13 @@ class EMFI_Formidable {
 			$this->mapped_fields = [];
 		}
 
-		if ( $this->debug ) {
-			echo '<pre>';
-			var_dump( [
-				'enabled'       => $this->enabled,
-				'list_uid'      => $this->list_uid,
-				'mapped_fields' => $this->mapped_fields,
-			] );
-			echo '</pre>';
-		}
+                if ( $this->debug && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                        error_log( print_r( [
+                                'enabled'       => $this->enabled,
+                                'list_uid'      => $this->list_uid,
+                                'mapped_fields' => $this->mapped_fields,
+                        ], true ) );
+                }
 	}
 
 
@@ -296,8 +298,9 @@ class EMFI_Formidable {
 			];
 		}
 
-		EmfiConfig::submitToList( $list_uid, $payload, $entry->ip );
-	}
+                $ip = sanitize_text_field( $entry->ip );
+                EmfiConfig::submitToList( $list_uid, $payload, $ip );
+        }
 }
 
 new EMFI_Formidable();
