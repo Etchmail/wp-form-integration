@@ -10,18 +10,19 @@ function emfi_api_v2_request( string $method, string $endpoint, array $body = []
 		return false;
 	}
 
-	/* NOTE: no Content-Type header – WP will add the multipart boundary */
-	$args = [
-		'method'  => $method,
-		'headers' => [ 'X-API-KEY' => $config['api_key'] ],
-		'timeout' => 30,
-	];
+        /* NOTE: no Content-Type header – WP will add the multipart boundary */
+        $args = [
+                'method'  => $method,
+                'headers' => [ 'X-API-KEY' => sanitize_text_field( $config['api_key'] ) ],
+                'timeout' => 30,
+        ];
 
 	if ( $method === 'POST' && ! empty( $body ) ) {
 		$args['body'] = $body;                 // array ⇒ multipart/form-data
 	}
 
-	$resp = wp_remote_request( $endpoint, $args );
+        $endpoint = esc_url_raw( $endpoint );
+        $resp = wp_remote_request( $endpoint, $args );
 
 	if ( is_wp_error( $resp ) ) {
 		error_log( 'Etchmail API error: ' . $resp->get_error_message() );

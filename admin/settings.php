@@ -44,7 +44,8 @@ class Emfi_Admin_Settings {
 			return;
 		}
 
-		$endpoint = rtrim( $config['api_url'], '/' ) . '/lists';
+                $base_url = esc_url_raw( $config['api_url'] );
+                $endpoint = rtrim( $base_url, '/' ) . '/lists';
 
 		$response = emfi_api_v2_request( 'GET', $endpoint, [], $config );
 
