@@ -27,10 +27,28 @@ class EmfiConfig {
 		],
 	];
 
-	// Register settings & fields
-	public static function register() {
-		foreach (self::$fields as $key => $field) {
-			register_setting(self::OPTION_GROUP, "emfi_$key");
+        /** Sanitize a saved option based on its key */
+        private static function sanitize_option_value( string $key, $value ) {
+                switch ( $key ) {
+                        case 'api_url':
+                                return esc_url_raw( (string) $value );
+                        case 'api_key':
+                        case 'enabled_form':
+                        default:
+                                return sanitize_text_field( (string) $value );
+                }
+        }
+
+        // Register settings & fields
+        public static function register() {
+                foreach ( self::$fields as $key => $field ) {
+                        register_setting(
+                                self::OPTION_GROUP,
+                                "emfi_$key",
+                                [ 'sanitize_callback' => function ( $val ) use ( $key ) {
+                                        return self::sanitize_option_value( $key, $val );
+                                } ]
+                        );
 
 			add_settings_field(
 				"emfi_$key",
@@ -64,10 +82,14 @@ class EmfiConfig {
 	}
 
 	// Get single option
-	public static function get($key) {
-		if (!isset(self::$fields[$key])) return null;
-		return get_option("emfi_$key", self::$fields[$key]['default']);
-	}
+        public static function get( $key ) {
+                if ( ! isset( self::$fields[ $key ] ) ) {
+                        return null;
+                }
+
+                $value = get_option( "emfi_$key", self::$fields[ $key ]['default'] );
+                return self::sanitize_option_value( $key, $value );
+        }
 
 	// Get all config as array
 	public static function all() {
@@ -80,7 +102,8 @@ class EmfiConfig {
 
 	public static function getLists() {
 
-			$endpoint = self::get('api_url') . '/lists';
+                        $base_url = esc_url_raw( self::get( 'api_url' ) );
+                        $endpoint = rtrim( $base_url, '/' ) . '/lists';
 
 			$response = emfi_api_v2_request('GET', $endpoint);
 
@@ -103,7 +126,8 @@ class EmfiConfig {
 			return null;
 		}
 
-		$endpoint = self::get('api_url') . "/lists/{$list_uid}/fields";
+                $base_url = esc_url_raw( self::get( 'api_url' ) );
+                $endpoint = rtrim( $base_url, '/' ) . "/lists/{$list_uid}/fields";
 
 		$response = emfi_api_v2_request('GET', $endpoint);
 
@@ -196,8 +220,9 @@ class EmfiConfig {
 //		error_log('[Etchmail] Mapped Data: ' . print_r($data, true));
 //		error_log('[Etchmail] Request Body: ' . print_r($body, true));
 
-		$endpoint = self::get( 'api_url' ) . "/lists/{$list_uid}/subscribers";
-		$resp     = emfi_api_v2_request( 'POST', $endpoint, $body );
+                $base_url = esc_url_raw( self::get( 'api_url' ) );
+                $endpoint = rtrim( $base_url, '/' ) . "/lists/{$list_uid}/subscribers";
+                $resp     = emfi_api_v2_request( 'POST', $endpoint, $body );
 
 		if ( ! is_array( $resp ) || ( $resp['status'] ?? '' ) !== 'success' ) {
 			// Suppress logging if it's the known duplicate subscriber warning
