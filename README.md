@@ -39,12 +39,6 @@ This is a WordPress plugin that integrates various form builders (starting with 
 
 > ℹ️ Make sure the selected form plugin (e.g. Contact Form 7) is installed and active.
 
----
-
-## 🚧 Roadmap
-
-- Per-form field mapping UI
-- Tag-based segmentation support
 
 ---
 

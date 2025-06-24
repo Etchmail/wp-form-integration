@@ -5,7 +5,7 @@
  * Description: Etchmail signup form integrations
  * Version: 1.0.0
  * Author: Tiaan Kellerman
- * License: GPL-3.0-or-later
+ * License: GPL-3.0
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  */
 
