@@ -1,57 +1,38 @@
-<?php defined('ABSPATH') || exit; // load.php
+<?php defined( 'ABSPATH' ) || exit; // load.php
 
-// init admin settings
-require_once (EMFI_PLUGIN_DIR . 'includes/functions.php');
-require_once (EMFI_PLUGIN_DIR . 'includes/class-emfi-config.php');
-require_once (EMFI_PLUGIN_DIR . 'admin/settings.php');
+// init
+require_once( ETCHFOIN_PLUGIN_DIR . 'includes/etchfoin-functions.php' );
+require_once( ETCHFOIN_PLUGIN_DIR . 'includes/class-etchfoin-config.php' );
+require_once( ETCHFOIN_PLUGIN_DIR . 'admin/etchfoin-admin-init.php' );
 
-// Run integration only if the selected plugin is enabled and available
-add_action('plugins_loaded', function () {
-        if ( ! class_exists( 'EmfiConfig' ) ) {
-                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-	                log_emfi( 'Etchmail: Emfi_Config not loaded.' , 'error');
-                }
-                return;
-        }
-
-	$enabled = EmfiConfig::get('enabled_form');
-
-        if ( ! $enabled ) {
-                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-	                log_emfi( 'Etchmail: No form integration selected.' ,'error');
-                }
-                return;
-        }
-
-	// check if the dependency is enabled.
-	$plugin_ready = match ($enabled) {
-		'cf7'     => defined('WPCF7_VERSION'),
-		'formidable' => class_exists( 'FrmAppHelper' ),
-		'fluent' => defined( 'FLUENTFORM' ),
-		// 'ninja'   => class_exists('Ninja_Forms'),
-		default   => false,
-	};
-
-	if ($enabled == 'none'){
-		return; // disables the loading
+add_action( 'plugins_loaded', function () {
+	if ( ! class_exists( 'ETCHFOINConfig' ) ) {
+		etchfoin_logging( 'Etchmail: Emfi_Config not loaded.', 'error' );
 	}
 
-        if ( ! $plugin_ready ) {
-                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                        log_emfi( "Etchmail: {$enabled} Integration could not be loaded." ,'error');
-                }
-                return;
-        }
+	$enabled = ETCHFOINConfig::get( 'enabled_form' );
 
+	if ( ! $enabled ) {
+		etchfoin_logging( 'Etchmail: No form integration selected.', 'error' );
+	}
 
-	// Load the correct integration file
-	$integration_file = plugin_dir_path(__FILE__) . "integrations/{$enabled}/main.php";
+	// check if the dependency is enabled.
+	$plugin_ready = match ( $enabled ) {
+		'cf7' => defined( 'WPCF7_VERSION' ),
+		// 'formidable' => class_exists( 'FrmAppHelper' ),
+		// 'fluent' => defined( 'FLUENTFORM' ),
+		// 'ninja'   => class_exists('Ninja_Forms'),
+		default => false,
+	};
 
-        if ( file_exists( $integration_file ) ) {
-                require_once $integration_file;
-        } else {
-                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-	                log_emfi( "Etchmail: Integration file for [$enabled] not found." ,'error');
-                }
-        }
-});
+	if ( $enabled == 'none' ) {
+		return; // disables the loading
+	}
+	$integration_file = plugin_dir_path( __FILE__ ) . "integrations/{$enabled}/main.php";
+
+	if ( file_exists( $integration_file ) ) {
+		require_once $integration_file;
+	} else {
+		etchfoin_logging( "Etchmail: Integration file for [$enabled] not found.", 'error' );
+	}
+} );

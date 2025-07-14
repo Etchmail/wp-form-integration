@@ -10,12 +10,15 @@
  */
 
 
-define( 'EMFI_PLUGIN', __FILE__ );
 
-define( 'EMFI_PLUGIN_BASENAME', plugin_basename( EMFI_PLUGIN ) );
+define( 'ETCHFOIN_PLUGIN', __FILE__ );
 
-define( 'EMFI_PLUGIN_NAME', trim( dirname( EMFI_PLUGIN_BASENAME ), '/' ) );
+define( 'ETCHFOIN_PLUGIN_BASENAME', plugin_basename( ETCHFOIN_PLUGIN ) );
 
-define( 'EMFI_PLUGIN_DIR', untrailingslashit( dirname( EMFI_PLUGIN ) ) . DIRECTORY_SEPARATOR );
+const ETCHFOIN_PLUGIN_VERSION = '1.1.0';
 
-require_once EMFI_PLUGIN_DIR . '/load.php';
+define( 'ETCHFOIN_PLUGIN_NAME', trim( dirname( ETCHFOIN_PLUGIN_BASENAME ), '/' ) );
+
+define( 'ETCHFOIN_PLUGIN_DIR', untrailingslashit( dirname( ETCHFOIN_PLUGIN ) ) . DIRECTORY_SEPARATOR );
+
+require_once ETCHFOIN_PLUGIN_DIR . '/load.php';

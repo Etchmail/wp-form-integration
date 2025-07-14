@@ -1,12 +1,12 @@
 <?php defined( 'ABSPATH' ) || exit; // includes/function.php
 
 
-function emfi_api_v2_request( string $method, string $endpoint, array $body = [], ?array $config = null ) {
+function etchfoin_api_v2_request( string $method, string $endpoint, array $body = [], ?array $config = null ) {
 
-	$config = $config ?: EmfiConfig::all();
+	$config = $config ?: ETCHFOINConfig::all();
 
 	if ( empty( $config['api_url'] ) || empty( $config['api_key'] ) ) {
-		log_emfi( 'Etchmail API: Config missing or incomplete', 'error' );
+		etchfoin_logging( 'Etchmail API: Config missing or incomplete', 'error' );
 		return false;
 	}
 
@@ -26,21 +26,17 @@ function emfi_api_v2_request( string $method, string $endpoint, array $body = []
 
 	if ( is_wp_error( $resp ) ) {
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			log_emfi( 'Etchmail API error: ' . $resp->get_error_message(), 'error' );
+			etchfoin_logging( 'Etchmail API error: ' . $resp->get_error_message(), 'error' );
 		}
-
 		return false;
 	}
 
 	return json_decode( wp_remote_retrieve_body( $resp ), true );
 }
 
+function etchfoin_logging( $message, $type = 'info' ): void {
+	$log_file = trailingslashit( ETCHFOIN_PLUGIN_DIR ) . 'ETCHFOIN_LOG.txt';
 
-function log_emfi( $message, $type = 'info' ): void {
-	$log_file = trailingslashit( EMFI_PLUGIN_DIR ) . 'log.txt';
-
-	// Format the log message with a timestamp
-
-	// Write the log message to the file (append mode)
+	// Write the log message to the file
 	file_put_contents( $log_file, sprintf( "[%s] %s\n", gmdate( 'Y-m-d H:i:s' ), "[ " . esc_html( $type ) . " ] - " . esc_html( $message ) ), FILE_APPEND | LOCK_EX );
 }

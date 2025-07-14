@@ -1,7 +1,7 @@
-<?php defined( 'ABSPATH' ) || exit; // includes/class-emfi-config.php
-class EmfiConfig {
-	const OPTION_GROUP = 'EMFI';
-	const OPTION_PAGE = 'EMFI';
+<?php defined( 'ABSPATH' ) || exit;
+class ETCHFOINConfig {
+	const OPTION_GROUP = 'ETCHFOIN';
+	const OPTION_PAGE = 'ETCHFOIN';
 
 	private static $fields = [
 		'api_url'      => [
@@ -18,10 +18,10 @@ class EmfiConfig {
 			'label'   => 'Select Form Integration',
 			'type'    => 'select',
 			'options' => [
-				'none'       => 'Disabled',
-				'cf7'        => 'Contact Form 7',
-				'formidable' => 'Formidable Forms',
-//				'fluent' => 'Fluent Forms',
+				'none' => 'Disabled',
+				'contactform7' => 'Contact Form 7',
+//				'formidable' => 'Formidable Forms', // todo
+//				'fluent' => 'Fluent Forms', // todo
 			],
 			'default' => 'none',
 		],
@@ -32,8 +32,6 @@ class EmfiConfig {
 		switch ( $key ) {
 			case 'api_url':
 				return esc_url_raw( (string) $value );
-			case 'api_key':
-			case 'enabled_form':
 			default:
 				return sanitize_text_field( (string) $value );
 		}
@@ -44,7 +42,7 @@ class EmfiConfig {
 		foreach ( self::$fields as $key => $field ) {
 			register_setting(
 				self::OPTION_GROUP,
-				"emfi_$key",
+				"etchfoin_$key",
 				[
 					'sanitize_callback' => function ( $val ) use ( $key ) {
 						return self::sanitize_option_value( $key, $val );
@@ -53,10 +51,10 @@ class EmfiConfig {
 			);
 
 			add_settings_field(
-				"emfi_$key",
+				"etchfoin_$key",
 				esc_html( $field['label'] ),
 				function () use ( $key, $field ) {
-					$name  = "emfi_$key";
+					$name  = "etchfoin_$key";
 					$value = get_option( $name, $field['default'] );
 
 					if ( $field['type'] === 'select' ) {
@@ -71,12 +69,12 @@ class EmfiConfig {
 					}
 				},
 				self::OPTION_PAGE,
-				'emfi_config_section'
+				'etchfoin_config_section'
 			);
 		}
 
 		add_settings_section(
-			'emfi_config_section',
+			'etchfoin_config_section',
 			'Etchmail Settings',
 			null,
 			self::OPTION_PAGE
@@ -89,7 +87,7 @@ class EmfiConfig {
 			return null;
 		}
 
-		$value = get_option( "emfi_$key", self::$fields[ $key ]['default'] );
+		$value = get_option( "etchfoin_$key", self::$fields[ $key ]['default'] );
 
 		return self::sanitize_option_value( $key, $value );
 	}
@@ -109,7 +107,7 @@ class EmfiConfig {
 		$base_url = esc_url_raw( self::get( 'api_url' ) );
 		$endpoint = rtrim( $base_url, '/' ) . '/lists';
 
-		$response = emfi_api_v2_request( 'GET', $endpoint );
+		$response = etchfoin_api_v2_request( 'GET', $endpoint );
 
 		if ( ! $response || ! isset( $response['data']['records'] ) ) {
 			return null;
@@ -133,7 +131,7 @@ class EmfiConfig {
 		$base_url = esc_url_raw( self::get( 'api_url' ) );
 		$endpoint = rtrim( $base_url, '/' ) . "/lists/{$list_uid}/fields";
 
-		$response = emfi_api_v2_request( 'GET', $endpoint );
+		$response = etchfoin_api_v2_request( 'GET', $endpoint );
 
 		if ( ! $response || ! isset( $response['data']['records'] ) ) {
 			return null;
@@ -224,7 +222,7 @@ class EmfiConfig {
 
 		$base_url = esc_url_raw( self::get( 'api_url' ) );
 		$endpoint = rtrim( $base_url, '/' ) . "/lists/{$list_uid}/subscribers";
-		$resp     = emfi_api_v2_request( 'POST', $endpoint, $body );
+		$resp     = etchfoin_api_v2_request( 'POST', $endpoint, $body );
 
 		if ( ! is_array( $resp ) || ( $resp['status'] ?? '' ) !== 'success' ) {
 			// Suppress logging if it's the known duplicate subscriber warning
@@ -232,7 +230,7 @@ class EmfiConfig {
 				return;
 			}
 
-			log_emfi( '[Etchmail] API error: ' . wp_json_encode( $resp ) );
+			etchfoin_logging( '[Etchmail] API error: ' . wp_json_encode( $resp ) );
 		}
 	}
 
@@ -288,4 +286,7 @@ class EmfiConfig {
 				return sanitize_text_field( (string) $str );
 		}
 	}
+
+
+
 }

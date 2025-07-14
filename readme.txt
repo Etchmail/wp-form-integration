@@ -32,6 +32,10 @@ The plugin adds a new “Etchmail” tab to each form’s settings screen where 
 
 No developer skills required.
 
+== External services ==
+
+This plugin connects to the Etchmail API to fetch your contact lists and the values that can be sent through to add new contact to your list via this integration using the Etchmail API. The API is provided and maintained by Etchmail. Please review their Acceptable Use Policy at https://www.etchmail.com/AUP/.
+
 == Frequently Asked Questions ==
 
 = Which form plugins are supported? =
@@ -50,7 +54,7 @@ Yes. All merge tags that exist in your selected list will appear in the dropdown
 == Changelog ==
 
 = 1.0.0 – 2025-06-24 =
-* Initial public release – CF7 & Formidable integrations, field mapper.
+* Initial public release.
 
 == Upgrade Notice ==
 
