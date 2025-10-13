@@ -3,7 +3,7 @@
  * Plugin Name: Etchmail Form Integration
  * Plugin URI: https://github.com/Etchmail/wp-form-integration
  * Description: Etchmail signup form integrations
- * Version: 1.1.0
+ * Version: 2.0.0
  * Author: Tiaan Kellerman
  * License: GPL-3.0
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
