@@ -12,7 +12,8 @@ This is a WordPress plugin that integrates various form builders with [Etchmail]
 ## 📦 Features
 
 - Contact Form 7 integration
-- Formidable Forms integration
+
+[//]: # (- Formidable Forms integration)
 
 ---
 

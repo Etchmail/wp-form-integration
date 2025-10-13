@@ -15,7 +15,7 @@ define( 'ETCHFOIN_PLUGIN', __FILE__ );
 
 define( 'ETCHFOIN_PLUGIN_BASENAME', plugin_basename( ETCHFOIN_PLUGIN ) );
 
-const ETCHFOIN_PLUGIN_VERSION = '1.1.0';
+const ETCHFOIN_PLUGIN_VERSION = '2.0.0';
 
 define( 'ETCHFOIN_PLUGIN_NAME', trim( dirname( ETCHFOIN_PLUGIN_BASENAME ), '/' ) );
 

@@ -35,4 +35,12 @@ add_action( 'plugins_loaded', function () {
 	} else {
 		etchfoin_logging( "Etchmail: Integration file for [$enabled] not found.", 'error' );
 	}
-} );
+});
+
+function my_load_scripts($hook) {
+
+	// create my own version codes
+	error_log('hellow');
+
+}
+add_action('', 'my_load_scripts');

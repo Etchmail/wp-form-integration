@@ -143,7 +143,7 @@ class ETCHFOINConfig {
 			if ( $field['visibility'] == "visible" ) {
 				$fields[] = [
 					'label'         => $field['label'],
-					'tag'           => $field['tag'],
+					'tag'           => strtolower($field['tag']),
 					'default_value' => $field['default_value'],
 					'required'      => $field['required'],
 					'type'          => $field['type']['identifier'],
@@ -163,73 +163,91 @@ class ETCHFOINConfig {
 	 * @param string|null $ip_address Optional originating IP address.
 	 */
 	public static function submitToList( string $list_uid, array $data, ?string $ip_address = null ): void {
-
 		/* 1. Gather the mapped fields ------------------------------------ */
-		$body  = [];     // final multipart payload
-		$email = '';     // promoted address (first email field wins)
+		$body  = [];
+		$email = '';
 
+		// Map CF7 "type" → sanitization profile used by user_input()
 		$type2filter = [
-			// Basic text-based input
 			'text'     => 'text',
 			'textarea' => 'textarea',
-
-			// Contact & personal info
 			'email'    => 'email',
 			'tel'      => 'tel',
 			'url'      => 'url',
-
-			// Structured data
 			'number'   => 'number',
 			'date'     => 'date',
-
-			// Selection inputs
 			'radio'    => 'radio',
 			'checkbox' => 'checkbox',
-			'select'   => 'checkbox',
-
-			// Misc
+			'select'   => 'checkbox', // comma-separated string (multi/single both handled)
 			'bool'     => 'bool',
 		];
 
 		foreach ( $data as $field ) {
+			if ( !is_array($field) ) { continue; }
 
-			$type = $field['type'] ?? 'text';
-			if ( ! isset( $type2filter[ $type ] ) ) {
+			$type_key = isset($field['type']) && is_string($field['type']) ? strtolower($field['type']) : 'text';
+			if ( ! isset( $type2filter[ $type_key ] ) ) {
 				continue;
 			}
 
-			$tag   = self::user_input( $field['tag'] );
-			$value = self::user_input( $field['value'], $type2filter[ $type ] );
+			$tag_raw   = isset($field['tag']) ? $field['tag'] : '';
+			$value_raw = $field['value'] ?? '';
 
-			if ( $type === 'email' && $email === '' ) {
-				$email = $value;          // only first email field
+			// Preserve exact tag case; strip unsafe chars in user_input()
+			$tag   = self::user_input( $tag_raw, 'text' ); // key scrubbing
+			$value = self::user_input( $value_raw, $type2filter[ $type_key ] );
+
+			if ($tag === '') { continue; }
+
+			if ( $type_key === 'email' && $email === '' ) {
+				$email = $value; // first valid email wins
 			}
 
-			$body[ $tag ] = $value;       // FNAME, LNAME, custom tags …
+			$body[ $tag ] = $value;
 		}
 
 		if ( $email === '' ) {
+			return; // Etchmail requires EMAIL
+		}
+
+		$body['EMAIL']               = $email;
+		$body['details[source]']     = 'web';
+
+		if ( $ip_address || isset($_SERVER['REMOTE_ADDR']) ) {
+			$body['details[ip_address]'] = $ip_address ?: sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+		}
+
+		/* 2. Build & call endpoint safely -------------------------------- */
+
+		// (a) Ensure https
+		$base_url = (string) self::get('api_url');
+		$base_url = esc_url_raw( $base_url );
+		if ( stripos($base_url, 'https://') !== 0 ) {
+			etchfoin_logging('[Etchmail] Insecure API URL blocked');
 			return;
 		}
 
-		$body['EMAIL']               = $email;          // Etchmail’s required field
-		$body['details[source]']     = 'web';     // flat “details[…]” key
-		if ( $ip_address != null ||  isset($_SERVER['REMOTE_ADDR'])) {
-			$body['details[ip_address]'] = $ip_address ?? (sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) ?? null);
+		// (b) Optional: allowlist host (uncomment and set domain if you want strict SSRF protection)
+		// $host = wp_parse_url($base_url, PHP_URL_HOST);
+		// if (!in_array($host, ['api.etchmail.com'], true)) {
+		//     etchfoin_logging('[Etchmail] Disallowed API host: ' . $host);
+		//     return;
+		// }
+
+		// (c) List UID should be safe path-segment characters (adjust regex to your format)
+		if ( !preg_match('/^[A-Za-z0-9_\-]+$/', $list_uid) ) {
+			etchfoin_logging('[Etchmail] Invalid list UID');
+			return;
 		}
 
-		/* 2. Hit the endpoint ------------------------------------------- */
-
-		$base_url = esc_url_raw( self::get( 'api_url' ) );
 		$endpoint = rtrim( $base_url, '/' ) . "/lists/{$list_uid}/subscribers";
-		$resp     = etchfoin_api_v2_request( 'POST', $endpoint, $body );
+
+		$resp = etchfoin_api_v2_request( 'POST', $endpoint, $body );
 
 		if ( ! is_array( $resp ) || ( $resp['status'] ?? '' ) !== 'success' ) {
-			// Suppress logging if it's the known duplicate subscriber warning
 			if ( isset( $resp['error'] ) && $resp['error'] === 'The subscriber already exists in this list.' ) {
-				return;
+				return; // benign duplicate
 			}
-
 			etchfoin_logging( '[Etchmail] API error: ' . wp_json_encode( $resp ) );
 		}
 	}
@@ -251,28 +269,22 @@ class ETCHFOINConfig {
 				return is_numeric( $str ) ? (string) $str : '';
 
 			case 'date':
-				// Match YYYY-MM-DD format only
-				return preg_match( '/^\d{4}-\d{2}-\d{2}$/', $str ) ? $str : '';
+				// YYYY-MM-DD only
+				return preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string)$str ) ? (string)$str : '';
 
 			case 'checkbox':
-				// If it's an array (e.g. from checkboxes), implode values with comma
-				if ( is_array( $str ) ) {
-					// Ensure each value is a string and safe
-					$str = array_map( 'sanitize_text_field', $str );
-
-					return (string) implode( ',', $str );
-				}
-
-				// For a single value checkbox
-				return $str;
-			case 'radio':
-				// Convert array of options into a comma-separated string
 				if ( is_array( $str ) ) {
 					$str = array_map( 'sanitize_text_field', $str );
-
 					return implode( ',', $str );
 				}
+				// SINGLE VALUE CHECKBOX — sanitize (previously unsanitized)
+				return sanitize_text_field( (string) $str );
 
+			case 'radio':
+				if ( is_array( $str ) ) {
+					$str = array_map( 'sanitize_text_field', $str );
+					return implode( ',', $str );
+				}
 				return sanitize_text_field( (string) $str );
 
 			case 'textarea':
@@ -283,10 +295,11 @@ class ETCHFOINConfig {
 
 			case 'text':
 			default:
-				return sanitize_text_field( (string) $str );
+				// Also used to scrub tag keys (restrict characters)
+				$s = sanitize_text_field( (string) $str );
+				// Optionally tighten when used for keys: keep wordish characters and dashes/underscores/brackets
+				// return preg_replace('/[^A-Za-z0-9_\-\.\[\]]/', '', $s);
+				return $s;
 		}
 	}
-
-
-
 }
