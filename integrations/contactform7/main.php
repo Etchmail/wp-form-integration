@@ -214,63 +214,86 @@ class ETCHFOIN_CF7 {
 
 	public function ajax_save_list_uid() {
 		$this->verify_ajax_request();
-		$form_id  = filter_input(INPUT_POST, 'form_id', FILTER_VALIDATE_INT);
-		$list_uid = sanitize_text_field($_POST['list_uid'] ?? '');
-		if (!$form_id) wp_send_json_error('Invalid form ID');
-		$ok = $this->set_form_option($form_id, 'list_uid', $list_uid);
-		$ok ? wp_send_json_success(['list_uid' => $list_uid])
-			: wp_send_json_error('Save failed');
+        $form_id  = filter_input( INPUT_POST, 'form_id', FILTER_VALIDATE_INT );
+        // Unslash then sanitize.
+
+        $list_uid = isset( $_POST['list_uid'] )
+            ? sanitize_text_field( wp_unslash( $_POST['list_uid'] ) )
+            : '';
+
+        if ( ! $form_id ) {
+            wp_send_json_error( 'Invalid form ID' );
+        }
+
+        $ok = $this->set_form_option( $form_id, 'list_uid', $list_uid );
+
+        if ( $ok ) {
+            wp_send_json_success( [ 'list_uid' => $list_uid ] );
+        } else {
+            wp_send_json_error( 'Save failed' );
+        }
 	}
 
 	public function ajax_get_list_fields() {
 		$this->verify_ajax_request();
-		$list_uid = sanitize_text_field($_POST['list_uid'] ?? '');
-		if (!$list_uid) wp_send_json_error('Missing list uid');
 
-		if (!method_exists('ETCHFOINConfig','getFields')) {
-			wp_send_json_error('Etchmail config not available.');
-		}
-		$fields = ETCHFOINConfig::getFields($list_uid);
-		if (!is_array($fields)) wp_send_json_error('Unable to fetch fields');
+        $list_uid = isset( $_POST['list_uid'] )
+            ? sanitize_text_field( wp_unslash( $_POST['list_uid'] ) )
+            : '';
 
-		wp_send_json_success(['fields' => $fields]);
+        if ( '' === $list_uid ) {
+            wp_send_json_error( 'Missing list uid' );
+        }
+
+        if ( ! method_exists( 'ETCHFOINConfig', 'getFields' ) ) {
+            wp_send_json_error( 'Etchmail config not available.' );
+        }
+
+        $fields = ETCHFOINConfig::getFields( $list_uid );
+        if ( ! is_array( $fields ) ) {
+            wp_send_json_error( 'Unable to fetch fields' );
+        }
+
+        wp_send_json_success( [ 'fields' => $fields ] );
 	}
 
 	public function ajax_save_mapped_fields() {
 		$this->verify_ajax_request();
 
-		$form_id = filter_input(INPUT_POST, 'form_id', FILTER_VALIDATE_INT);
-		if (!$form_id) {
-			wp_send_json_error('Invalid data');
-		}
+        $form_id = filter_input( INPUT_POST, 'form_id', FILTER_VALIDATE_INT );
+        if ( ! $form_id ) {
+            wp_send_json_error( 'Invalid data' );
+        }
 
-		$mapped_raw = $_POST['mapped_fields'] ?? [];
+        // Unslash raw input first.
+        $mapped_raw = isset( $_POST['mapped_fields'] ) ? wp_unslash( $_POST['mapped_fields'] ) : [];
 
-		if (is_string($mapped_raw)) {
-			$decoded = json_decode(stripslashes($mapped_raw), true);
-			$mapped  = is_array($decoded) ? $decoded : [];
-		} else {
-			$mapped = is_array($mapped_raw) ? $mapped_raw : [];
-		}
+        // Accept either JSON string or array; decode/sanitize safely.
+        if ( is_string( $mapped_raw ) ) {
+            $decoded = json_decode( $mapped_raw, true );
+            $mapped  = is_array( $decoded ) ? $decoded : [];
+        } else {
+            $mapped = is_array( $mapped_raw ) ? $mapped_raw : [];
+        }
 
-		if (!is_array($mapped)) {
-			wp_send_json_error('Invalid data');
-		}
+        if ( ! is_array( $mapped ) ) {
+            wp_send_json_error( 'Invalid data' );
+        }
 
-		$clean = [];
-		foreach ($mapped as $cf7 => $etch) {
-			$cf7  = sanitize_key((string) $cf7);
-			$etch = is_string($etch) ? sanitize_key($etch) : '';
-			$clean[$cf7] = $etch; // '' means "Not mapped"
-		}
+        $clean = [];
+        foreach ( $mapped as $cf7 => $etch ) {
+            $cf7_key  = sanitize_key( (string) $cf7 );
+            $etch_key = is_string( $etch ) ? sanitize_key( $etch ) : '';
+            $clean[ $cf7_key ] = $etch_key; // '' means "Not mapped"
+        }
 
-		$ok = $this->set_form_option($form_id, 'mapped_fields', $clean);
+        $ok = $this->set_form_option( $form_id, 'mapped_fields', $clean );
 
-		if ($ok) {
-			wp_send_json_success(['mapped_fields' => $clean]);
-		} else {
-			wp_send_json_error('Save failed');
-		}
+        if ( $ok ) {
+            wp_send_json_success( [ 'mapped_fields' => $clean ] );
+        } else {
+            wp_send_json_error( 'Save failed' );
+        }
 	}
 
 

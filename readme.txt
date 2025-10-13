@@ -20,7 +20,6 @@ Connect Forms to Etchmail and add every new entry to your mailing list automatic
 * **Per-form toggles** – enable only on the forms you need.
 * **Supports multiple plugins** out of the box:
 	* Contact Form 7
-	* Formidable Forms
 	* More to come!
 
 The plugin adds a new “Etchmail” tab to each form’s settings screen where you can:
@@ -53,10 +52,13 @@ Yes. All merge tags that exist in your selected list will appear in the dropdown
 
 == Changelog ==
 
+= 2.0.0 – 2025-10-13 =
+* Code Rebase, all forms will have to be re-setup
+
 = 1.0.0 – 2025-06-24 =
 * Initial public release.
 
 == Upgrade Notice ==
 
-= 1.0 =
+= 1.0.0 =
 First stable release – upgrade to start sending your form leads to Etchmail automatically.
