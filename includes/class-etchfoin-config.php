@@ -140,15 +140,13 @@ class ETCHFOINConfig {
 		$fields = array();
 
 		foreach ( $response['data']['records'] as $field ) {
-			if ( $field['visibility'] == "visible" ) {
-				$fields[] = [
+			$fields[] = [
 					'label'         => $field['label'],
 					'tag'           => strtolower($field['tag']),
 					'default_value' => $field['default_value'],
 					'required'      => $field['required'],
 					'type'          => $field['type']['identifier'],
 				];
-			}
 		}
 
 		return $fields;
