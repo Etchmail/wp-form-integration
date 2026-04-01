@@ -61,12 +61,12 @@ class ETCHFOIN_CF7 {
 	public function cf7_render_editor_panel( $form ) {
 		$this->register_vars( $form );
 
-		if ( $this->form !== null ) {
+		if ( null !== $this->form ) {
 			$this->form_fields = $this->form->scan_form_tags();
 			$this->list_fields = $this->list_uid ? ETCHFOINConfig::getFields( $this->list_uid ) : [];
 
-			if ( $this->form->id == 0 ) {
-				echo 'Please save the form, for the integration to enable.';
+			if ( 0 === $this->form->id ) {
+				echo esc_html__( 'Please save the form, for the integration to enable.', 'etchfoin' );
 			} else {
 				include ETCHFOIN_PLUGIN_DIR . 'integrations/contactform7/assets/etchfoin-view-cf7.php';
 			}
@@ -77,8 +77,8 @@ class ETCHFOIN_CF7 {
 
 		$this->form = $form;
 
-		if ( $this->form === null ) {
-			echo '<div class="notice notice-error"><p>Unable to render Etchmail panel: Invalid form context.</p></div>';
+		if ( null === $this->form ) {
+			echo '<div class="notice notice-error"><p>' . esc_html__( 'Unable to render Etchmail panel: Invalid form context.', 'etchfoin' ) . '</p></div>';
 
 			return;
 		}
@@ -125,7 +125,7 @@ class ETCHFOIN_CF7 {
 		// Validate it as an integer
 		$form_id = filter_var( $form_id, FILTER_VALIDATE_INT );
 
-		if ( $form_id === false ) {
+		if ( false === $form_id ) {
 			wp_send_json_error( "Invalid form ID" );
 		}
 
@@ -145,7 +145,7 @@ class ETCHFOIN_CF7 {
 		// Validate it as an integer
 		$form_id = filter_var( $form_id, FILTER_VALIDATE_INT );
 
-		if ( $form_id === false ) {
+		if ( false === $form_id ) {
 			wp_send_json_error( "Invalid form ID" );
 		}
 
@@ -324,18 +324,17 @@ class ETCHFOIN_CF7 {
 
 
 	public function enqueue_assets( $hook ) {
-//		error_log($hook);
-		// WordPress passes the current screen’s hook suffix, e.g. 'settings_page_etchmail-fi'
-		if ( $hook !== 'toplevel_page_wpcf7' ) {
+		// WordPress passes the current screen's hook suffix
+		if ( 'toplevel_page_wpcf7' !== $hook ) {
 			return; // Load nothing
 		}
 
 		wp_register_script(
 			'etchfoin-contact-form-7',
 			plugins_url( 'integrations/contactform7/assets/etchfoin-js-cf7.js', ETCHFOIN_PLUGIN ),
-			[ 'jquery' ],          // dependencies
-			'1.0.0',
-			true                   // in footer
+			[ 'jquery' ],
+			ETCHFOIN_PLUGIN_VERSION,
+			true
 		);
 
 
@@ -351,7 +350,7 @@ class ETCHFOIN_CF7 {
 			'etchfoin-contact-form-7-style',
 			plugins_url( 'integrations/contactform7/assets/etchfoin-styles-cf7.css', ETCHFOIN_PLUGIN ),
 			[],
-			'1.0.0'
+			ETCHFOIN_PLUGIN_VERSION
 		);
 
 		wp_enqueue_style( 'etchfoin-contact-form-7-style' );
@@ -386,7 +385,7 @@ class ETCHFOIN_CF7 {
 		// Assemble the payload
 		$payload = [];
 		foreach ( $mapped_fields as $cf7_name => $etch_tag ) {
-			if (!is_string($cf7_name) || !is_string($etch_tag) || $etch_tag === '') {
+			if (!is_string($cf7_name) || !is_string($etch_tag) || '' === $etch_tag) {
 				continue;
 			}
 

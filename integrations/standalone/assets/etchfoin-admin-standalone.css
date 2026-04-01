@@ -1,0 +1,243 @@
+/* Etchmail Standalone — Admin Styles */
+
+#etchfoin-standalone-app {
+	max-width: 1100px;
+}
+
+.etchfoin-sa-section {
+	background: #fff;
+	border: 1px solid #ccd0d4;
+	border-radius: 4px;
+	padding: 20px 24px;
+	margin-bottom: 20px;
+}
+
+.etchfoin-sa-section h2 {
+	margin-top: 0;
+	font-size: 16px;
+}
+
+.etchfoin-sa-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.etchfoin-sa-row select {
+	min-width: 320px;
+}
+
+.etchfoin-sa-shortcode-box {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	background: #f0f0f1;
+	border: 1px solid #ccd0d4;
+	border-radius: 4px;
+	padding: 10px 14px;
+	margin-bottom: 16px;
+}
+
+.etchfoin-sa-shortcode-box code {
+	flex: 1;
+	font-size: 14px;
+	word-break: break-all;
+}
+
+#etchfoin-sa-fields-table .check-column {
+	width: 40px;
+	text-align: center;
+}
+
+.etchfoin-sa-actions {
+	display: flex;
+	align-items: center;
+}
+
+/* ── Style editor grid ────────────────────────────────────────────── */
+
+.etchfoin-sa-style-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+}
+
+.etchfoin-sa-fieldset {
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	padding: 16px;
+	margin: 0;
+	min-width: 0;
+	overflow: hidden;
+}
+
+.etchfoin-sa-fieldset legend {
+	font-weight: 600;
+	font-size: 13px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: #50575e;
+	padding: 0 6px;
+}
+
+.etchfoin-sa-control {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 10px;
+}
+
+.etchfoin-sa-control:last-child {
+	margin-bottom: 0;
+}
+
+.etchfoin-sa-control > label {
+	flex: 0 0 160px;
+	min-width: 0;
+	font-size: 13px;
+	color: #1d2327;
+}
+
+.etchfoin-sa-control > input[type="color"] {
+	width: 48px;
+	height: 32px;
+	padding: 2px;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.etchfoin-sa-control > input[type="number"] {
+	width: 80px;
+}
+
+.etchfoin-sa-control > select,
+.etchfoin-sa-control > input[type="text"] {
+	flex: 1;
+	min-width: 0;
+	max-width: 100%;
+}
+
+/* Responsive: stack on narrow screens */
+@media (max-width: 960px) {
+	.etchfoin-sa-style-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* ── Preview isolation from WP admin styles ─────────────────────── */
+#etchfoin-sa-preview .etchmail-form {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	line-height: 1.5;
+	box-sizing: border-box;
+	display: block;
+	margin: 0;
+	text-align: left;
+}
+
+#etchfoin-sa-preview .etchmail-form *,
+#etchfoin-sa-preview .etchmail-form *::before,
+#etchfoin-sa-preview .etchmail-form *::after {
+	box-sizing: inherit;
+}
+
+#etchfoin-sa-preview .etchmail-form__inner {
+	display: block;
+	margin: 0;
+	padding: 0;
+	border: none;
+	background: none;
+}
+
+#etchfoin-sa-preview .etchmail-form__label {
+	display: block;
+	margin: 0;
+	padding: 0;
+}
+
+#etchfoin-sa-preview .etchmail-form__input {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	box-shadow: none;
+	outline: none;
+	margin: 0;
+	font-family: inherit;
+}
+
+#etchfoin-sa-preview .etchmail-form__submit {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	box-shadow: none;
+	line-height: 1.4;
+	letter-spacing: normal;
+	text-decoration: none;
+	text-transform: none;
+	font-family: inherit;
+	margin-left: 0;
+	margin-right: 0;
+}
+
+#etchfoin-sa-preview .etchmail-form__submit:hover {
+	opacity: 0.9;
+}
+
+#etchfoin-sa-preview select.etchmail-form__input,
+#etchfoin-sa-preview .etchmail-form__select {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23666' stroke-width='1.5'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 12px center;
+	padding-right: 36px;
+}
+
+/* Prevent WP admin from overriding form element colours/sizes */
+#etchfoin-sa-preview input[type="text"],
+#etchfoin-sa-preview input[type="email"],
+#etchfoin-sa-preview input[type="url"],
+#etchfoin-sa-preview input[type="tel"],
+#etchfoin-sa-preview input[type="number"],
+#etchfoin-sa-preview input[type="date"],
+#etchfoin-sa-preview input[type="datetime-local"],
+#etchfoin-sa-preview textarea,
+#etchfoin-sa-preview select {
+	width: 100%;
+	display: block;
+	padding: var(--etchmail-field-pad-v) var(--etchmail-field-pad-h);
+	border: var(--etchmail-field-border-w) solid var(--etchmail-field-border);
+	border-radius: var(--etchmail-field-radius);
+	font-size: var(--etchmail-field-font-size);
+	min-height: var(--etchmail-field-height);
+	line-height: 1.4;
+	color: var(--etchmail-field-text);
+	background: var(--etchmail-field-bg);
+}
+
+#etchfoin-sa-preview input[type="text"]:focus,
+#etchfoin-sa-preview input[type="email"]:focus,
+#etchfoin-sa-preview input[type="url"]:focus,
+#etchfoin-sa-preview input[type="tel"]:focus,
+#etchfoin-sa-preview input[type="number"]:focus,
+#etchfoin-sa-preview input[type="date"]:focus,
+#etchfoin-sa-preview input[type="datetime-local"]:focus,
+#etchfoin-sa-preview textarea:focus,
+#etchfoin-sa-preview select:focus {
+	outline: none;
+	border-color: var(--etchmail-accent);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--etchmail-accent) 25%, transparent);
+}
+
+#etchfoin-sa-preview button[type="button"] {
+	padding: var(--etchmail-btn-pad-v) var(--etchmail-btn-pad-h);
+	border: none;
+	border-radius: var(--etchmail-btn-radius);
+	background: var(--etchmail-btn-bg);
+	color: var(--etchmail-btn-text);
+	font-size: var(--etchmail-btn-font-size);
+	font-weight: var(--etchmail-btn-font-weight);
+	cursor: pointer;
+	min-height: 44px;
+}
