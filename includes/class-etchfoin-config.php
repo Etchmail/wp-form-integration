@@ -18,12 +18,19 @@ class ETCHFOINConfig {
 			'label'   => 'Select Form Integration',
 			'type'    => 'select',
 			'options' => [
-				'none' => 'Disabled',
-				'contactform7' => 'Contact Form 7',
-//				'formidable' => 'Formidable Forms', // todo
-//				'fluent' => 'Fluent Forms', // todo
+				'none'          => 'Disabled',
+				'contactform7'  => 'Contact Form 7',
 			],
 			'default' => 'none',
+		],
+		'enable_standalone' => [
+			'label'   => 'Enable Standalone Shortcode Form',
+			'type'    => 'select',
+			'options' => [
+				'no'  => 'Disabled',
+				'yes' => 'Enabled',
+			],
+			'default' => 'no',
 		],
 	];
 
@@ -57,11 +64,12 @@ class ETCHFOINConfig {
 					$name  = "etchfoin_$key";
 					$value = get_option( $name, $field['default'] );
 
-					if ( $field['type'] === 'select' ) {
+					if ( 'select' === $field['type'] ) {
 						echo '<select name="' . esc_attr( $name ) . '">';
 						foreach ( $field['options'] as $optionValue => $label ) {
 							$selected = selected( $value, $optionValue, false );
-							echo '<option value="' . esc_attr( $optionValue ) . '" ' . esc_attr($selected) . '>' . esc_html( $label ) . '</option>';
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- selected() returns safe HTML attribute.
+						echo '<option value="' . esc_attr( $optionValue ) . '" ' . $selected . '>' . esc_html( $label ) . '</option>';
 						}
 						echo '</select>';
 					} else {
@@ -75,7 +83,7 @@ class ETCHFOINConfig {
 
 		add_settings_section(
 			'etchfoin_config_section',
-			'Etchmail Settings',
+			esc_html__( 'Etchmail Settings', 'etchfoin' ),
 			null,
 			self::OPTION_PAGE
 		);
@@ -124,7 +132,7 @@ class ETCHFOINConfig {
 
 	public static function getFields( $list_uid = null ) {
 
-		if ( $list_uid == null ) {
+		if ( null == $list_uid ) {
 			return null;
 		}
 
@@ -140,13 +148,17 @@ class ETCHFOINConfig {
 		$fields = array();
 
 		foreach ( $response['data']['records'] as $field ) {
-			$fields[] = [
+			$entry = [
 					'label'         => $field['label'],
-					'tag'           => strtolower($field['tag']),
+					'tag'           => $field['tag'],
 					'default_value' => $field['default_value'],
 					'required'      => $field['required'],
 					'type'          => $field['type']['identifier'],
 				];
+			if ( ! empty( $field['options'] ) && is_array( $field['options'] ) ) {
+				$entry['options'] = $field['options'];
+			}
+			$fields[] = $entry;
 		}
 
 		return $fields;
@@ -161,6 +173,10 @@ class ETCHFOINConfig {
 	 * @param string|null $ip_address Optional originating IP address.
 	 */
 	public static function submitToList( string $list_uid, array $data, ?string $ip_address = null ): void {
+		$dbg = defined( 'ETCHFOIN_DEBUG' ) && ETCHFOIN_DEBUG;
+
+		if ( $dbg ) { etchfoin_logging( '[submitToList] START — list_uid=' . $list_uid . ' fields=' . count( $data ), 'debug' ); }
+
 		/* 1. Gather the mapped fields ------------------------------------ */
 		$body  = [];
 		$email = '';
@@ -181,10 +197,14 @@ class ETCHFOINConfig {
 		];
 
 		foreach ( $data as $field ) {
-			if ( !is_array($field) ) { continue; }
+			if ( !is_array($field) ) {
+				if ( $dbg ) { etchfoin_logging( '[submitToList] Skipping non-array field', 'debug' ); }
+				continue;
+			}
 
 			$type_key = isset($field['type']) && is_string($field['type']) ? strtolower($field['type']) : 'text';
 			if ( ! isset( $type2filter[ $type_key ] ) ) {
+				if ( $dbg ) { etchfoin_logging( '[submitToList] Unknown type "' . $type_key . '" for tag "' . ($field['tag'] ?? '?') . '" — skipping', 'debug' ); }
 				continue;
 			}
 
@@ -195,24 +215,35 @@ class ETCHFOINConfig {
 			$tag   = self::user_input( $tag_raw, 'text' ); // key scrubbing
 			$value = self::user_input( $value_raw, $type2filter[ $type_key ] );
 
-			if ($tag === '') { continue; }
+			if ('' === $tag) {
+				if ( $dbg ) { etchfoin_logging( '[submitToList] Empty tag after sanitization — skipping', 'debug' ); }
+				continue;
+			}
 
-			if ( $type_key === 'email' && $email === '' ) {
+			if ( 'email' === $type_key && '' === $email ) {
 				$email = $value; // first valid email wins
 			}
 
-			$body[ $tag ] = $value;
+			$tag_upper = strtoupper( $tag );
+			if ( $dbg ) { etchfoin_logging( '[submitToList] Mapped: ' . $tag_upper . ' = "' . $value . '" (type: ' . $type_key . ')', 'debug' ); }
+			$body[ $tag_upper ] = $value;
 		}
 
-		if ( $email === '' ) {
+		if ( $dbg ) { etchfoin_logging( '[submitToList] Body keys: ' . implode( ', ', array_keys( $body ) ) . ' | email: "' . $email . '"', 'debug' ); }
+
+		if ( '' === $email ) {
+			if ( $dbg ) { etchfoin_logging( '[submitToList] ABORT: No email found — Etchmail requires EMAIL', 'debug' ); }
 			return; // Etchmail requires EMAIL
 		}
 
 		$body['EMAIL']               = $email;
 		$body['details[source]']     = 'web';
 
-		if ( $ip_address || isset($_SERVER['REMOTE_ADDR']) ) {
-			$body['details[ip_address]'] = $ip_address ?: sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+		if ( $ip_address || isset( $_SERVER['REMOTE_ADDR'] ) ) {
+			$ip = $ip_address ? $ip_address : sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+			if ( filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+				$body['details[ip_address]'] = $ip;
+			}
 		}
 
 		/* 2. Build & call endpoint safely -------------------------------- */
@@ -240,10 +271,15 @@ class ETCHFOINConfig {
 
 		$endpoint = rtrim( $base_url, '/' ) . "/lists/{$list_uid}/subscribers";
 
+		if ( $dbg ) { etchfoin_logging( '[submitToList] Endpoint: ' . $endpoint, 'debug' ); }
+		if ( $dbg ) { etchfoin_logging( '[submitToList] Request body: ' . wp_json_encode( $body ), 'debug' ); }
+
 		$resp = etchfoin_api_v2_request( 'POST', $endpoint, $body );
 
-		if ( ! is_array( $resp ) || ( $resp['status'] ?? '' ) !== 'success' ) {
-			if ( isset( $resp['error'] ) && $resp['error'] === 'The subscriber already exists in this list.' ) {
+		if ( $dbg ) { etchfoin_logging( '[submitToList] Response: ' . wp_json_encode( $resp ), 'debug' ); }
+
+		if ( ! is_array( $resp ) || 'success' !== ( $resp['status'] ?? '' ) ) {
+			if ( isset( $resp['error'] ) && 'The subscriber already exists in this list.' === $resp['error'] ) {
 				return; // benign duplicate
 			}
 			etchfoin_logging( '[Etchmail] API error: ' . wp_json_encode( $resp ) );
@@ -289,7 +325,7 @@ class ETCHFOINConfig {
 				return sanitize_textarea_field( (string) $str );
 
 			case 'bool':
-				return ( $str === 'on' || $str === '1' || $str === true ) ? '1' : '0';
+				return ( 'on' === $str || '1' === $str || true === $str ) ? '1' : '0';
 
 			case 'text':
 			default:

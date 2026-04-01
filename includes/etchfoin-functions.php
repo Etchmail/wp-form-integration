@@ -17,7 +17,7 @@ function etchfoin_api_v2_request( string $method, string $endpoint, array $body 
 		'timeout' => 30,
 	];
 
-	if ( $method === 'POST' && ! empty( $body ) ) {
+	if ( 'POST' === $method && ! empty( $body ) ) {
 		$args['body'] = $body;                 // array ⇒ multipart/form-data
 	}
 
@@ -35,8 +35,12 @@ function etchfoin_api_v2_request( string $method, string $endpoint, array $body 
 }
 
 function etchfoin_logging( $message, $type = 'info' ): void {
-	$log_file = trailingslashit( ETCHFOIN_PLUGIN_DIR ) . 'ETCHFOIN_LOG.txt';
+	if ( ! defined( 'ETCHFOIN_DEBUG' ) || ! ETCHFOIN_DEBUG ) {
+		return;
+	}
 
-	// Write the log message to the file
-	file_put_contents( $log_file, sprintf( "[%s] %s\n", gmdate( 'Y-m-d H:i:s' ), "[ " . esc_html( $type ) . " ] - " . esc_html( $message ) ), FILE_APPEND | LOCK_EX );
+	if ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Debug-only logging.
+		error_log( sprintf( '[Etchmail] [%s] %s', $type, $message ) );
+	}
 }

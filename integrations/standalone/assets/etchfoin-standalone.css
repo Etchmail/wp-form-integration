@@ -1,0 +1,425 @@
+/* Etchmail Standalone Form — Frontend Styles */
+
+/* ================================================================== */
+/*  CSS CUSTOM PROPERTIES (defaults; overridden via inline style)      */
+/* ================================================================== */
+.etchmail-form {
+	/* General */
+	--etchmail-accent: #0073aa;
+	--etchmail-radius: 6px;
+	--etchmail-text: #333;
+	--etchmail-bg: #fff;
+	--etchmail-border: #ccc;
+	--etchmail-error: #d63638;
+	--etchmail-success: #00a32a;
+	--etchmail-max-width: 600px;
+	--etchmail-form-padding: 24px;
+	--etchmail-field-gap: 16px;
+	/* Labels */
+	--etchmail-label-color: inherit;
+	--etchmail-label-size: 13px;
+	--etchmail-label-weight: 600;
+	--etchmail-label-spacing: 4px;
+	/* Inputs */
+	--etchmail-field-bg: var(--etchmail-bg);
+	--etchmail-field-text: inherit;
+	--etchmail-field-border: var(--etchmail-border);
+	--etchmail-field-border-w: 1px;
+	--etchmail-field-radius: var(--etchmail-radius);
+	--etchmail-field-font-size: 15px;
+	--etchmail-field-pad-v: 10px;
+	--etchmail-field-pad-h: 12px;
+	--etchmail-field-height: 44px;
+	--etchmail-placeholder: #999;
+	/* Button */
+	--etchmail-btn-bg: var(--etchmail-accent);
+	--etchmail-btn-text: #fff;
+	--etchmail-btn-font-size: 15px;
+	--etchmail-btn-font-weight: 600;
+	--etchmail-btn-pad-v: 10px;
+	--etchmail-btn-pad-h: 24px;
+	--etchmail-btn-radius: var(--etchmail-radius);
+	--etchmail-btn-margin-top: 0px;
+	--etchmail-btn-margin-bottom: 0px;
+
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	font-size: var(--etchmail-field-font-size);
+	line-height: 1.5;
+	box-sizing: border-box;
+	max-width: var(--etchmail-max-width);
+}
+
+.etchmail-form *, .etchmail-form *::before, .etchmail-form *::after {
+	box-sizing: inherit;
+}
+
+/* ================================================================== */
+/*  THEMES                                                            */
+/* ================================================================== */
+
+/* Light (default) */
+.etchmail-form--light {
+	background: var(--etchmail-bg);
+	color: var(--etchmail-text);
+	border: 1px solid var(--etchmail-border);
+	border-radius: var(--etchmail-radius);
+	padding: var(--etchmail-form-padding);
+}
+
+/* Dark */
+.etchmail-form--dark {
+	--etchmail-bg: #1e1e1e;
+	--etchmail-text: #f0f0f0;
+	--etchmail-border: #444;
+	background: var(--etchmail-bg);
+	color: var(--etchmail-text);
+	border: 1px solid var(--etchmail-border);
+	border-radius: var(--etchmail-radius);
+	padding: var(--etchmail-form-padding);
+}
+
+.etchmail-form--dark .etchmail-form__input {
+	background: #2c2c2c;
+	color: #f0f0f0;
+	border-color: #555;
+}
+
+.etchmail-form--dark .etchmail-form__input:focus {
+	border-color: var(--etchmail-accent);
+}
+
+/* Minimal */
+.etchmail-form--minimal {
+	background: transparent;
+	color: inherit;
+	padding: 0;
+}
+
+.etchmail-form--minimal .etchmail-form__input {
+	border: none;
+	border-bottom: 2px solid var(--etchmail-border);
+	border-radius: 0;
+	padding-left: 0;
+	padding-right: 0;
+}
+
+.etchmail-form--minimal .etchmail-form__input:focus {
+	border-bottom-color: var(--etchmail-accent);
+}
+
+/* ================================================================== */
+/*  LAYOUT                                                            */
+/* ================================================================== */
+
+/* Stacked (default) */
+.etchmail-form--stacked .etchmail-form__fields {
+	display: flex;
+	flex-direction: column;
+	gap: var(--etchmail-field-gap);
+}
+
+/* Inline */
+.etchmail-form--inline .etchmail-form__inner {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 12px;
+}
+
+.etchmail-form--inline .etchmail-form__fields {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	flex: 1 1 auto;
+}
+
+.etchmail-form--inline .etchmail-form__field {
+	flex: 1 1 160px;
+	min-width: 0;
+}
+
+.etchmail-form--inline .etchmail-form__actions {
+	flex: 0 0 auto;
+}
+
+.etchmail-form--inline .etchmail-form__message {
+	flex-basis: 100%;
+}
+
+/* ================================================================== */
+/*  FIELDS                                                            */
+/* ================================================================== */
+
+.etchmail-form__label {
+	display: block;
+	font-weight: var(--etchmail-label-weight);
+	font-size: var(--etchmail-label-size);
+	margin-bottom: var(--etchmail-label-spacing);
+	color: var(--etchmail-label-color);
+}
+
+.etchmail-form__required {
+	color: var(--etchmail-error);
+}
+
+.etchmail-form__input {
+	display: block;
+	width: 100%;
+	padding: var(--etchmail-field-pad-v) var(--etchmail-field-pad-h);
+	border: var(--etchmail-field-border-w) solid var(--etchmail-field-border);
+	border-radius: var(--etchmail-field-radius);
+	font-size: var(--etchmail-field-font-size);
+	min-height: var(--etchmail-field-height);
+	line-height: 1.4;
+	color: var(--etchmail-field-text);
+	background: var(--etchmail-field-bg);
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.etchmail-form__input::placeholder {
+	color: var(--etchmail-placeholder);
+}
+
+.etchmail-form__input:focus {
+	outline: none;
+	border-color: var(--etchmail-accent);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--etchmail-accent) 25%, transparent);
+}
+
+.etchmail-form__input[aria-invalid="true"] {
+	border-color: var(--etchmail-error);
+}
+
+/* Checkbox special */
+.etchmail-form__field--checkbox .etchmail-form__input {
+	width: auto;
+	display: inline-block;
+}
+
+.etchmail-form__checkbox-label {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	cursor: pointer;
+}
+
+textarea.etchmail-form__input {
+	resize: vertical;
+}
+
+/* Select / dropdown */
+select.etchmail-form__input,
+.etchmail-form__select {
+	cursor: pointer;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23666' stroke-width='1.5'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 12px center;
+	padding-right: 36px;
+}
+
+select[multiple].etchmail-form__input,
+select.etchmail-form__select[multiple] {
+	background-image: none;
+	min-height: calc(var(--etchmail-field-height) * 2);
+}
+
+/* Radio group */
+.etchmail-form__radio-group {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.etchmail-form__radio-label {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: var(--etchmail-field-font-size, 14px);
+	cursor: pointer;
+}
+
+/* Checkbox group */
+.etchmail-form__checkbox-group {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+/* ================================================================== */
+/*  BUTTON                                                            */
+/* ================================================================== */
+
+.etchmail-form__submit {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: var(--etchmail-btn-pad-v) var(--etchmail-btn-pad-h);
+	border: none;
+	border-radius: var(--etchmail-btn-radius);
+	background: var(--etchmail-btn-bg);
+	color: var(--etchmail-btn-text);
+	font-size: var(--etchmail-btn-font-size);
+	font-weight: var(--etchmail-btn-font-weight);
+	margin-top: var(--etchmail-btn-margin-top);
+	margin-bottom: var(--etchmail-btn-margin-bottom);
+	cursor: pointer;
+	transition: opacity 0.2s ease, transform 0.1s ease;
+	min-height: 44px;
+}
+
+.etchmail-form__submit--full {
+	width: 100%;
+}
+
+.etchmail-form__submit:hover {
+	opacity: 0.9;
+}
+
+.etchmail-form__submit:active {
+	transform: scale(0.98);
+}
+
+.etchmail-form__submit:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+/* ================================================================== */
+/*  MESSAGES                                                          */
+/* ================================================================== */
+
+.etchmail-form__message {
+	margin-top: 12px;
+	font-size: 14px;
+	min-height: 0;
+	transition: min-height 0.3s ease;
+}
+
+.etchmail-form__message:empty {
+	display: none;
+}
+
+.etchmail-form__message--success {
+	color: var(--etchmail-success);
+}
+
+.etchmail-form__message--error {
+	color: var(--etchmail-error);
+}
+
+/* ================================================================== */
+/*  LOADING SPINNER                                                   */
+/* ================================================================== */
+
+.etchmail-form__spinner {
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	border: 2px solid rgba(255,255,255,0.3);
+	border-top-color: #fff;
+	border-radius: 50%;
+	animation: etchmail-spin 0.6s linear infinite;
+}
+
+@keyframes etchmail-spin {
+	to { transform: rotate(360deg); }
+}
+
+/* ================================================================== */
+/*  RESPONSIVE                                                        */
+/* ================================================================== */
+
+@media (max-width: 480px) {
+	.etchmail-form--inline .etchmail-form__inner {
+		flex-direction: column;
+	}
+	.etchmail-form--inline .etchmail-form__field {
+		flex-basis: 100%;
+	}
+	.etchmail-form--inline .etchmail-form__actions {
+		width: 100%;
+	}
+	.etchmail-form--inline .etchmail-form__submit {
+		width: 100%;
+	}
+}
+
+/* ================================================================
+   POPUP / MODAL OVERLAY
+   ================================================================ */
+.etchmail-popup {
+	display: none;
+	position: fixed;
+	inset: 0;
+	z-index: 999999;
+	align-items: center;
+	justify-content: center;
+}
+.etchmail-popup.etchmail-popup--open {
+	display: flex;
+}
+
+.etchmail-popup__overlay {
+	position: absolute;
+	inset: 0;
+	background: var(--etchmail-popup-overlay, rgba(0, 0, 0, 0.6));
+}
+
+.etchmail-popup__dialog {
+	position: relative;
+	width: 90%;
+	max-width: 560px;
+	max-height: 90vh;
+	overflow-y: auto;
+	background: #fff;
+	border-radius: 8px;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+	padding: 32px 28px 24px;
+	animation: etchmailPopupIn 0.3s ease-out;
+}
+
+.etchmail-popup__close {
+	position: absolute;
+	top: 8px;
+	right: 12px;
+	background: none;
+	border: none;
+	font-size: 28px;
+	line-height: 1;
+	color: #666;
+	cursor: pointer;
+	padding: 4px 8px;
+	transition: color 0.15s;
+}
+.etchmail-popup__close:hover,
+.etchmail-popup__close:focus {
+	color: #000;
+}
+
+.etchmail-popup__dialog .etchmail-form {
+	max-width: none;
+}
+
+@keyframes etchmailPopupIn {
+	from { opacity: 0; transform: translateY(-20px) scale(0.96); }
+	to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Closing animation — applied via JS before removing --open */
+.etchmail-popup--closing .etchmail-popup__dialog {
+	animation: etchmailPopupOut 0.2s ease-in forwards;
+}
+.etchmail-popup--closing .etchmail-popup__overlay {
+	animation: etchmailFadeOut 0.2s ease-in forwards;
+}
+@keyframes etchmailPopupOut {
+	to { opacity: 0; transform: translateY(-10px) scale(0.96); }
+}
+@keyframes etchmailFadeOut {
+	to { opacity: 0; }
+}
