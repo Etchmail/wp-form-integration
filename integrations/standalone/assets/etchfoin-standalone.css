@@ -1,6 +1,19 @@
 /* Etchmail Standalone Form — Frontend Styles */
 
 /* ================================================================== */
+/*  HONEYPOT — visually hidden, invisible to humans                   */
+/* ================================================================== */
+.etchmail-form__hp {
+	position: absolute !important;
+	left: -9999px !important;
+	top: -9999px !important;
+	width: 1px !important;
+	height: 1px !important;
+	overflow: hidden !important;
+	opacity: 0 !important;
+}
+
+/* ================================================================== */
 /*  CSS CUSTOM PROPERTIES (defaults; overridden via inline style)      */
 /* ================================================================== */
 .etchmail-form {

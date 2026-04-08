@@ -32,6 +32,25 @@ class ETCHFOINConfig {
 			],
 			'default' => 'no',
 		],
+		'recaptcha_enabled' => [
+			'label'   => 'Enable reCAPTCHA v3',
+			'type'    => 'select',
+			'options' => [
+				'no'  => 'Disabled',
+				'yes' => 'Enabled',
+			],
+			'default' => 'no',
+		],
+		'recaptcha_site_key' => [
+			'label'   => 'reCAPTCHA Site Key',
+			'type'    => 'text',
+			'default' => '',
+		],
+		'recaptcha_secret_key' => [
+			'label'   => 'reCAPTCHA Secret Key',
+			'type'    => 'text',
+			'default' => '',
+		],
 	];
 
 	/** Sanitize a saved option based on its key */

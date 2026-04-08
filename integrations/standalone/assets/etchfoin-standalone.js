@@ -65,37 +65,38 @@
 		var data = new FormData(form);
 		data.append('action', 'etchfoin_standalone_submit');
 
-		// Debug: log all FormData entries
-		if (DEBUG) {
-			log('FormData entries:');
-			data.forEach(function (value, key) {
-				log('  ' + key + ' = ' + (key === '_etchmail_nonce' ? value.substring(0, 6) + '...' : value));
-			});
-		}
-
-		var ajaxUrl = (window.etchfoinStandalone && window.etchfoinStandalone.ajaxUrl) || '/wp-admin/admin-ajax.php';
-		log('Sending XHR POST to', ajaxUrl);
-
-		var xhr = new XMLHttpRequest();
-		xhr.open('POST', ajaxUrl);
-		xhr.onload = function () {
-			btn.disabled = false;
-			btn.textContent = originalText;
-
-			log('Response status:', xhr.status);
-			log('Response body:', xhr.responseText.substring(0, 500));
-
-			var response;
-			try { response = JSON.parse(xhr.responseText); } catch (e) {
-				log('Failed to parse JSON response:', e.message);
-				response = null;
+		function doSubmit(formData) {
+			// Debug: log all FormData entries
+			if (DEBUG) {
+				log('FormData entries:');
+				formData.forEach(function (value, key) {
+					log('  ' + key + ' = ' + (key === '_etchmail_nonce' ? value.substring(0, 6) + '...' : value));
+				});
 			}
 
-			if (xhr.status === 200 && response && response.success) {
-				log('SUCCESS');
-				showMessage(msgEl, 'success', msgEl.dataset.success || 'Thank you for subscribing!');
-				form.reset();
-				inputs.forEach(function (input) { input.removeAttribute('aria-invalid'); });
+			var ajaxUrl = (window.etchfoinStandalone && window.etchfoinStandalone.ajaxUrl) || '/wp-admin/admin-ajax.php';
+			log('Sending XHR POST to', ajaxUrl);
+
+			var xhr = new XMLHttpRequest();
+			xhr.open('POST', ajaxUrl);
+			xhr.onload = function () {
+				btn.disabled = false;
+				btn.textContent = originalText;
+
+				log('Response status:', xhr.status);
+				log('Response body:', xhr.responseText.substring(0, 500));
+
+				var response;
+				try { response = JSON.parse(xhr.responseText); } catch (e) {
+					log('Failed to parse JSON response:', e.message);
+					response = null;
+				}
+
+				if (xhr.status === 200 && response && response.success) {
+					log('SUCCESS');
+					showMessage(msgEl, 'success', msgEl.dataset.success || 'Thank you for subscribing!');
+					form.reset();
+					inputs.forEach(function (input) { input.removeAttribute('aria-invalid'); });
 
 				// Auto-close popup on success if configured
 				var popup = form.closest('.etchmail-popup');
@@ -114,7 +115,28 @@
 			log('XHR onerror — network failure');
 			showMessage(msgEl, 'error', msgEl.dataset.error || 'Something went wrong.');
 		};
-		xhr.send(data);
+		xhr.send(formData);
+		}
+
+		// Execute reCAPTCHA v3 if enabled, then submit
+		var rc = window.etchfoinStandalone;
+		if (rc && rc.recaptchaEnabled && rc.recaptchaSiteKey && window.grecaptcha) {
+			log('Executing reCAPTCHA v3');
+			grecaptcha.ready(function () {
+				grecaptcha.execute(rc.recaptchaSiteKey, { action: 'etchmail_submit' }).then(function (token) {
+					log('reCAPTCHA token obtained');
+					data.append('_etchmail_recaptcha', token);
+					doSubmit(data);
+				}).catch(function (err) {
+					log('reCAPTCHA error:', err);
+					btn.disabled = false;
+					btn.textContent = originalText;
+					showMessage(msgEl, 'error', 'reCAPTCHA verification failed. Please try again.');
+				});
+			});
+		} else {
+			doSubmit(data);
+		}
 	}
 
 	function showMessage(el, type, text) {

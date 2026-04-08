@@ -174,6 +174,12 @@ class ETCHFOIN_Standalone {
 			<form class="etchmail-form__inner" novalidate>
 				<?php wp_nonce_field( 'etchfoin_standalone_submit', '_etchmail_nonce', false ); ?>
 				<input type="hidden" name="list_uid" value="<?php echo esc_attr( $list_uid ); ?>" />
+				<input type="hidden" name="_etchmail_ts" value="<?php echo esc_attr( time() ); ?>" />
+				<!-- honeypot -->
+				<div class="etchmail-form__hp" aria-hidden="true">
+					<label for="<?php echo esc_attr( $form_id ); ?>-hp">Leave this empty</label>
+					<input type="text" name="_etchmail_hp" id="<?php echo esc_attr( $form_id ); ?>-hp" autocomplete="off" tabindex="-1" />
+				</div>
 
 				<div class="etchmail-form__fields">
 					<?php foreach ( $fields as $field ) : ?>
@@ -409,17 +415,33 @@ class ETCHFOIN_Standalone {
 			ETCHFOIN_PLUGIN_VERSION
 		);
 
+		// reCAPTCHA v3
+		$recaptcha_enabled  = 'yes' === ETCHFOINConfig::get( 'recaptcha_enabled' );
+		$recaptcha_site_key = ETCHFOINConfig::get( 'recaptcha_site_key' );
+
+		if ( $recaptcha_enabled && '' !== $recaptcha_site_key ) {
+			wp_enqueue_script(
+				'google-recaptcha',
+				'https://www.google.com/recaptcha/api.js?render=' . rawurlencode( $recaptcha_site_key ),
+				[],
+				null,
+				true
+			);
+		}
+
 		wp_enqueue_script(
 			'etchfoin-standalone',
 			$base . 'etchfoin-standalone.js',
-			[],
+			$recaptcha_enabled && '' !== $recaptcha_site_key ? [ 'google-recaptcha' ] : [],
 			ETCHFOIN_PLUGIN_VERSION,
 			true
 		);
 
 		wp_localize_script( 'etchfoin-standalone', 'etchfoinStandalone', [
-			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-			'debug'   => defined( 'ETCHFOIN_DEBUG' ) && ETCHFOIN_DEBUG,
+			'ajaxUrl'          => admin_url( 'admin-ajax.php' ),
+			'debug'            => defined( 'ETCHFOIN_DEBUG' ) && ETCHFOIN_DEBUG,
+			'recaptchaEnabled' => $recaptcha_enabled && '' !== $recaptcha_site_key,
+			'recaptchaSiteKey' => $recaptcha_enabled ? $recaptcha_site_key : '',
 		] );
 	}
 
@@ -445,6 +467,56 @@ class ETCHFOIN_Standalone {
 			$this->debug_log( 'FAIL: Invalid list UID format' );
 			wp_send_json_error( [ 'message' => 'Invalid list.' ] );
 			return;
+		}
+
+		// Honeypot check — field must be empty
+		if ( ! empty( $_POST['_etchmail_hp'] ) ) {
+			$this->debug_log( 'FAIL: Honeypot field filled (bot detected)' );
+			// Return fake success so bots don't retry
+			wp_send_json_success( [ 'message' => 'Subscribed successfully.' ] );
+			return;
+		}
+
+		// Time-based check — reject submissions faster than 2 seconds
+		$form_ts = isset( $_POST['_etchmail_ts'] ) ? absint( $_POST['_etchmail_ts'] ) : 0;
+		if ( $form_ts > 0 && ( time() - $form_ts ) < 2 ) {
+			$this->debug_log( 'FAIL: Form submitted too quickly (' . ( time() - $form_ts ) . 's)' );
+			wp_send_json_error( [ 'message' => 'Please wait a moment before submitting.' ] );
+			return;
+		}
+
+		// reCAPTCHA v3 verification
+		if ( 'yes' === ETCHFOINConfig::get( 'recaptcha_enabled' ) && '' !== ETCHFOINConfig::get( 'recaptcha_secret_key' ) ) {
+			$recaptcha_token = isset( $_POST['_etchmail_recaptcha'] ) ? sanitize_text_field( wp_unslash( $_POST['_etchmail_recaptcha'] ) ) : '';
+			if ( '' === $recaptcha_token ) {
+				$this->debug_log( 'FAIL: reCAPTCHA token missing' );
+				wp_send_json_error( [ 'message' => 'reCAPTCHA verification failed.' ] );
+				return;
+			}
+
+			$verify = wp_remote_post( 'https://www.google.com/recaptcha/api/siteverify', [
+				'body' => [
+					'secret'   => ETCHFOINConfig::get( 'recaptcha_secret_key' ),
+					'response' => $recaptcha_token,
+					'remoteip' => sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ),
+				],
+			] );
+
+			if ( is_wp_error( $verify ) ) {
+				$this->debug_log( 'FAIL: reCAPTCHA request error: ' . $verify->get_error_message() );
+				wp_send_json_error( [ 'message' => 'reCAPTCHA verification failed. Please try again.' ] );
+				return;
+			}
+
+			$result = json_decode( wp_remote_retrieve_body( $verify ), true );
+			$score  = $result['score'] ?? 0;
+			$this->debug_log( 'reCAPTCHA result: success=' . ( $result['success'] ?? 'false' ) . ' score=' . $score );
+
+			if ( empty( $result['success'] ) || $score < 0.5 ) {
+				$this->debug_log( 'FAIL: reCAPTCHA score too low or verification failed' );
+				wp_send_json_error( [ 'message' => 'reCAPTCHA verification failed.' ] );
+				return;
+			}
 		}
 
 		// Rate-limit: simple transient-based throttle per IP
